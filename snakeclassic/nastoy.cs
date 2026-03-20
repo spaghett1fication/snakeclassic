@@ -17,7 +17,22 @@ namespace snakeclassic
         {
             InitializeComponent();
             this.Text = string.Empty;
-            this.ControlBox = false;
+            this.ControlBox = false;     
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;   // нельзя растягивать
+            this.MaximizeBox = false;
+            this.MinimizeBox = true;
+            this.AutoScaleMode = AutoScaleMode.None;
+
+            // Форма становится ровно по размеру твоего фона
+            if (this.BackgroundImage != null)
+            {
+                this.ClientSize = this.BackgroundImage.Size;
+                this.BackgroundImageLayout = ImageLayout.None;   // не растягивать
+            }
+
+            // Дополнительно жёстко фиксируем размер (на всякий случай)
+            this.MinimumSize = this.Size;
+            this.MaximumSize = this.Size;
         }
         [DllImport("user32.Dll", EntryPoint = "ReleaseCapture")]
         private extern static void ReleaseCapture();
