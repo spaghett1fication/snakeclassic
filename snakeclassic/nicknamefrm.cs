@@ -57,5 +57,31 @@ namespace snakeclassic
             form.Show();
             this.Hide(); // скрывает menu
         }
+
+        private void nicknamefrm_Load(object sender, EventArgs e)
+        {
+            btn_gotov.MouseEnter += btn_gotov_MouseEnter;
+            btn_gotov.MouseLeave += btn_gotov_MouseLeave;
+            nazad_btn.MouseEnter += nazad_btn_MouseEnter;
+            nazad_btn.MouseLeave += nazad_btn_MouseLeave;
+        }
+        private void btn_gotov_MouseEnter(object sender, EventArgs e)
+        {
+            btn_gotov.Location = new Point(btn_gotov.Location.X + 2, btn_gotov.Location.Y + 2);
+        }
+
+        private void btn_gotov_MouseLeave(object sender, EventArgs e)
+        {
+            btn_gotov.Location = new Point(btn_gotov.Location.X - 2, btn_gotov.Location.Y - 2);
+        }
+        private void nazad_btn_MouseEnter(object sender, EventArgs e)
+        {
+            nazad_btn.Location = new Point(nazad_btn.Location.X + 2, nazad_btn.Location.Y + 2);
+        }
+
+        private void nazad_btn_MouseLeave(object sender, EventArgs e)
+        {
+            nazad_btn.Location = new Point(nazad_btn.Location.X - 2, nazad_btn.Location.Y - 2);
+        }
     }
 }

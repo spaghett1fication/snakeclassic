@@ -39,7 +39,7 @@
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
             this.pictureBox6 = new System.Windows.Forms.PictureBox();
             this.pictureBox7 = new System.Windows.Forms.PictureBox();
-            this.button3 = new System.Windows.Forms.Button();
+            this.btn_gotov = new System.Windows.Forms.Button();
             this.nazad_btn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
@@ -170,29 +170,30 @@
             this.pictureBox7.TabIndex = 11;
             this.pictureBox7.TabStop = false;
             // 
-            // button3
+            // btn_gotov
             // 
-            this.button3.BackColor = System.Drawing.Color.Transparent;
-            this.button3.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button3.BackgroundImage")));
-            this.button3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button3.Location = new System.Drawing.Point(25, 424);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(277, 83);
-            this.button3.TabIndex = 12;
-            this.button3.UseVisualStyleBackColor = false;
+            this.btn_gotov.BackColor = System.Drawing.Color.Transparent;
+            this.btn_gotov.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btn_gotov.BackgroundImage")));
+            this.btn_gotov.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btn_gotov.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_gotov.Location = new System.Drawing.Point(25, 424);
+            this.btn_gotov.Name = "btn_gotov";
+            this.btn_gotov.Size = new System.Drawing.Size(277, 72);
+            this.btn_gotov.TabIndex = 12;
+            this.btn_gotov.UseVisualStyleBackColor = false;
             // 
             // nazad_btn
             // 
             this.nazad_btn.BackColor = System.Drawing.Color.Transparent;
             this.nazad_btn.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("nazad_btn.BackgroundImage")));
-            this.nazad_btn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.nazad_btn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.nazad_btn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.nazad_btn.Location = new System.Drawing.Point(25, 523);
             this.nazad_btn.Name = "nazad_btn";
-            this.nazad_btn.Size = new System.Drawing.Size(277, 83);
+            this.nazad_btn.Size = new System.Drawing.Size(277, 76);
             this.nazad_btn.TabIndex = 13;
             this.nazad_btn.UseVisualStyleBackColor = false;
+            this.nazad_btn.Click += new System.EventHandler(this.nazad_btn_Click);
             // 
             // nastoy
             // 
@@ -202,7 +203,7 @@
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(640, 611);
             this.Controls.Add(this.nazad_btn);
-            this.Controls.Add(this.button3);
+            this.Controls.Add(this.btn_gotov);
             this.Controls.Add(this.pictureBox7);
             this.Controls.Add(this.pictureBox6);
             this.Controls.Add(this.pictureBox5);
@@ -211,6 +212,9 @@
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.pictureBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "nastoy";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "nastoy";
@@ -239,7 +243,8 @@
         private System.Windows.Forms.PictureBox pictureBox5;
         private System.Windows.Forms.PictureBox pictureBox6;
         private System.Windows.Forms.PictureBox pictureBox7;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btn_gotov;
         private System.Windows.Forms.Button nazad_btn;
+
     }
 }

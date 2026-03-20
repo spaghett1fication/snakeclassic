@@ -114,5 +114,12 @@ namespace snakeclassic
             form.Show();
             this.Hide(); // скрывает menu
         }
+
+        private void table_button_Click(object sender, EventArgs e)
+        {
+            leadbordfrm form = new leadbordfrm();
+            form.Show();
+            this.Hide(); // скрывает menu
+        }
     }
 }

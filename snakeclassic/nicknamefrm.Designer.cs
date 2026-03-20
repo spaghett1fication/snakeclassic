@@ -31,12 +31,12 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(nicknamefrm));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.svernutbtn = new System.Windows.Forms.Button();
             this.closebtn = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.button3 = new System.Windows.Forms.Button();
+            this.btn_gotov = new System.Windows.Forms.Button();
             this.nazad_btn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
@@ -67,6 +67,30 @@
             this.panel1.TabIndex = 5;
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
             // 
+            // button2
+            // 
+            this.button2.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button2.BackgroundImage")));
+            this.button2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button2.Location = new System.Drawing.Point(451, 3);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(30, 30);
+            this.button2.TabIndex = 3;
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button1
+            // 
+            this.button1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button1.BackgroundImage")));
+            this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Location = new System.Drawing.Point(415, 3);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(30, 30);
+            this.button1.TabIndex = 2;
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // svernutbtn
             // 
             this.svernutbtn.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("svernutbtn.BackgroundImage")));
@@ -89,30 +113,6 @@
             this.closebtn.TabIndex = 0;
             this.closebtn.UseVisualStyleBackColor = true;
             // 
-            // button1
-            // 
-            this.button1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button1.BackgroundImage")));
-            this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.Location = new System.Drawing.Point(415, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(30, 30);
-            this.button1.TabIndex = 2;
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // button2
-            // 
-            this.button2.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button2.BackgroundImage")));
-            this.button2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button2.Location = new System.Drawing.Point(451, 3);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(30, 30);
-            this.button2.TabIndex = 3;
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
             // textBox1
             // 
             this.textBox1.BackColor = System.Drawing.SystemColors.Menu;
@@ -124,24 +124,24 @@
             this.textBox1.Size = new System.Drawing.Size(309, 32);
             this.textBox1.TabIndex = 6;
             // 
-            // button3
+            // btn_gotov
             // 
-            this.button3.BackColor = System.Drawing.Color.Transparent;
-            this.button3.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button3.BackgroundImage")));
-            this.button3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button3.Location = new System.Drawing.Point(122, 243);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(249, 60);
-            this.button3.TabIndex = 7;
-            this.button3.UseVisualStyleBackColor = false;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.btn_gotov.BackColor = System.Drawing.Color.Transparent;
+            this.btn_gotov.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btn_gotov.BackgroundImage")));
+            this.btn_gotov.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btn_gotov.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_gotov.Location = new System.Drawing.Point(122, 243);
+            this.btn_gotov.Name = "btn_gotov";
+            this.btn_gotov.Size = new System.Drawing.Size(249, 60);
+            this.btn_gotov.TabIndex = 7;
+            this.btn_gotov.UseVisualStyleBackColor = false;
+            this.btn_gotov.Click += new System.EventHandler(this.button3_Click);
             // 
             // nazad_btn
             // 
             this.nazad_btn.BackColor = System.Drawing.Color.Transparent;
             this.nazad_btn.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("nazad_btn.BackgroundImage")));
-            this.nazad_btn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.nazad_btn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.nazad_btn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.nazad_btn.Location = new System.Drawing.Point(122, 309);
             this.nazad_btn.Name = "nazad_btn";
@@ -158,13 +158,16 @@
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(484, 398);
             this.Controls.Add(this.nazad_btn);
-            this.Controls.Add(this.button3);
+            this.Controls.Add(this.btn_gotov);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.pictureBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "nicknamefrm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "nicknamefrm";
+            this.Load += new System.EventHandler(this.nicknamefrm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -181,7 +184,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btn_gotov;
         private System.Windows.Forms.Button nazad_btn;
     }
 }

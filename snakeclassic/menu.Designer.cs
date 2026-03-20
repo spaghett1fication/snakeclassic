@@ -79,6 +79,7 @@
             this.table_button.Size = new System.Drawing.Size(438, 92);
             this.table_button.TabIndex = 2;
             this.table_button.UseVisualStyleBackColor = false;
+            this.table_button.Click += new System.EventHandler(this.table_button_Click);
             // 
             // exit_button
             // 
