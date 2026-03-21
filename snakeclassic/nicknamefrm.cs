@@ -8,9 +8,9 @@ namespace snakeclassic
 {
     public partial class nicknamefrm : Form
     {
-        // Путь к файлу с ником (тот же каталог что и leaderboard.txt)
+        // ✅ Путь рядом с .exe — работает у всех, файл создаётся автоматически
         public static readonly string NickPath =
-            Path.Combine(@"D:\Visual Studio\course\snakeclassic", "nickname.txt");
+            Path.Combine(Application.StartupPath, "nickname.txt");
 
         public nicknamefrm()
         {
@@ -49,7 +49,7 @@ namespace snakeclassic
             string nick = nicknametextbox.Text.Trim();
             if (string.IsNullOrEmpty(nick)) nick = "Игрок";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(NickPath));
+            // Папка Application.StartupPath всегда существует — Directory.CreateDirectory не нужен
             File.WriteAllText(NickPath, nick);
 
             Form1 form = new Form1();

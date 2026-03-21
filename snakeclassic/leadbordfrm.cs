@@ -11,9 +11,9 @@ namespace snakeclassic
 {
     public partial class leadbordfrm : Form
     {
-        // ── Путь к файлу — публичный static ───────────────────────────────
+        // ✅ Путь рядом с .exe — работает у всех, папка всегда существует
         public static readonly string SavePath =
-            Path.Combine(@"D:\Visual Studio\course\snakeclassic", "leaderboard.txt");
+            Path.Combine(Application.StartupPath, "leaderboard.txt");
 
         public leadbordfrm()
         {
@@ -27,7 +27,7 @@ namespace snakeclassic
         [DllImport("user32.Dll", EntryPoint = "SendMessage")]
         private extern static void SendMessage(IntPtr hWnd, int wMsg, int wParam, int lParam);
 
-        // ── Drag ──────────────────────────────────────────────────────────
+        // ── Drag ──────────────────────────────────────────────────────
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -47,19 +47,16 @@ namespace snakeclassic
             this.Hide();
         }
 
-        // ── Load ──────────────────────────────────────────────────────────
+        // ── Load ──────────────────────────────────────────────────────
         private void leadbordfrm_Load(object sender, EventArgs e)
         {
-            nazad_btn.MouseEnter += (s, ev) =>
-                nazad_btn.Location = new Point(nazad_btn.Location.X + 2, nazad_btn.Location.Y + 2);
-            nazad_btn.MouseLeave += (s, ev) =>
-                nazad_btn.Location = new Point(nazad_btn.Location.X - 2, nazad_btn.Location.Y - 2);
-
+            nazad_btn.MouseEnter += (s, ev) => nazad_btn.Location = new Point(nazad_btn.Location.X + 2, nazad_btn.Location.Y + 2);
+            nazad_btn.MouseLeave += (s, ev) => nazad_btn.Location = new Point(nazad_btn.Location.X - 2, nazad_btn.Location.Y - 2);
             this.lblTitle.Paint += new PaintEventHandler(lblTitle_Paint);
             LoadLeaderboard();
         }
 
-        // ── Paint заголовка ───────────────────────────────────────────────
+        // ── Paint заголовка ───────────────────────────────────────────
         private void lblTitle_Paint(object sender, PaintEventArgs e)
         {
             var lbl = sender as Label;
@@ -76,14 +73,16 @@ namespace snakeclassic
                                 new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
             }
 
-            // Основной текст — розовый
-            using (var mainBrush = new SolidBrush(Color.FromArgb(255, 80, 220)))
+            // Основной розовый текст
+            using (var mainBrush = new SolidBrush(Color.FromArgb(255, 20, 200)))
+            {
                 e.Graphics.DrawString(lbl.Text, lbl.Font, mainBrush,
                     new RectangleF(0, 0, lbl.Width, lbl.Height),
                     new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+            }
         }
 
-        // ── Загрузка таблицы в tablePanel ────────────────────────────────
+        // ── Загрузка и отображение ────────────────────────────────────
         private void LoadLeaderboard()
         {
             tablePanel.Controls.Clear();
@@ -95,81 +94,80 @@ namespace snakeclassic
                 var emptyLbl = new Label
                 {
                     Text = "Пока нет результатов...",
-                    ForeColor = Color.FromArgb(180, 180, 180),
-                    Font = new Font("Segoe UI", 12f, FontStyle.Italic),
-                    TextAlign = ContentAlignment.MiddleCenter,
-                    Size = new Size(420, 50),
-                    BackColor = Color.Transparent
+                    ForeColor = Color.Gray,
+                    Font = new Font("Segoe UI", 12, FontStyle.Italic),
+                    AutoSize = false,
+                    Width = tablePanel.Width - 10,
+                    Height = 40,
+                    TextAlign = ContentAlignment.MiddleCenter
                 };
                 tablePanel.Controls.Add(emptyLbl);
                 return;
             }
 
-            string[] medals = { "🥇", "🥈", "🥉" };
-
             for (int i = 0; i < list.Count; i++)
             {
                 var entry = list[i];
+                int rank = i + 1;
+
+                // Цвет строки
+                Color rowColor;
+                if (rank == 1) rowColor = Color.FromArgb(60, 50, 30, 0);
+                else if (rank == 2) rowColor = Color.FromArgb(60, 40, 40, 40);
+                else if (rank == 3) rowColor = Color.FromArgb(60, 40, 20, 0);
+                else rowColor = (i % 2 == 0)
+                    ? Color.FromArgb(40, 255, 255, 255)
+                    : Color.FromArgb(20, 255, 255, 255);
 
                 var row = new Panel
                 {
-                    Size = new Size(416, 36),
-                    BackColor = i % 2 == 0
-                        ? Color.FromArgb(60, 40, 100)
-                        : Color.FromArgb(45, 25, 80),
-                    Margin = new Padding(0, 0, 0, 2)
+                    Width = tablePanel.Width - 10,
+                    Height = 36,
+                    BackColor = rowColor,
+                    Margin = new System.Windows.Forms.Padding(0, 2, 0, 2)
                 };
 
-                // Золото/серебро/бронза для топ-3
-                if (i < 3)
-                    row.BackColor = i == 0 ? Color.FromArgb(80, 60, 0)
-                                 : i == 1 ? Color.FromArgb(50, 50, 60)
-                                          : Color.FromArgb(60, 35, 15);
+                // Медаль / номер
+                string medal = rank == 1 ? "🥇" : rank == 2 ? "🥈" : rank == 3 ? "🥉" : $"#{rank}";
+                Color rankColor = rank == 1 ? Color.Gold : rank == 2 ? Color.Silver : rank == 3 ? Color.Peru : Color.LightGray;
 
-                // Место
-                var lblPlace = new Label
+                var lblRank = new Label
                 {
-                    Text = i < 3 ? medals[i] : $"{i + 1}.",
-                    Font = new Font("Segoe UI", 11f, FontStyle.Bold),
-                    ForeColor = i == 0 ? Color.Gold
-                              : i == 1 ? Color.Silver
-                              : i == 2 ? Color.FromArgb(205, 127, 50)
-                              : Color.White,
-                    Location = new Point(6, 0),
-                    Size = new Size(52, 36),
-                    TextAlign = ContentAlignment.MiddleCenter
+                    Text = medal,
+                    ForeColor = rankColor,
+                    Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                    Location = new Point(8, 8),
+                    AutoSize = true
                 };
 
-                // Ник
                 var lblNick = new Label
                 {
                     Text = entry.Key,
-                    Font = new Font("Segoe UI", 10f),
                     ForeColor = Color.White,
-                    Location = new Point(60, 0),
-                    Size = new Size(220, 36),
-                    TextAlign = ContentAlignment.MiddleLeft
+                    Font = new Font("Segoe UI", 11),
+                    Location = new Point(55, 9),
+                    AutoSize = true
                 };
 
-                // Очки
                 var lblScore = new Label
                 {
                     Text = entry.Value.ToString(),
-                    Font = new Font("Segoe UI", 10f, FontStyle.Bold),
-                    ForeColor = Color.FromArgb(100, 255, 150),
-                    Location = new Point(288, 0),
-                    Size = new Size(122, 36),
-                    TextAlign = ContentAlignment.MiddleRight
+                    ForeColor = Color.LightGreen,
+                    Font = new Font("Segoe UI", 11, FontStyle.Bold),
+                    Width = 80,
+                    TextAlign = ContentAlignment.MiddleRight,
+                    Location = new Point(row.Width - 90, 9),
+                    AutoSize = false
                 };
 
-                row.Controls.Add(lblPlace);
+                row.Controls.Add(lblRank);
                 row.Controls.Add(lblNick);
                 row.Controls.Add(lblScore);
                 tablePanel.Controls.Add(row);
             }
         }
 
-        // ── Чтение из файла — PUBLIC STATIC ──────────────────────────────
+        // ── Чтение из файла — PUBLIC STATIC ───────────────────────────
         public static List<KeyValuePair<string, int>> ReadFromFile()
         {
             var list = new List<KeyValuePair<string, int>>();
@@ -181,15 +179,14 @@ namespace snakeclassic
                 if (parts.Length == 2 && int.TryParse(parts[1], out int s))
                     list.Add(new KeyValuePair<string, int>(parts[0].Trim(), s));
             }
-
             return list.OrderByDescending(x => x.Value).ToList();
         }
 
-        // ── Добавление результата — PUBLIC STATIC ────────────────────────
+        // ── Добавление результата — PUBLIC STATIC ─────────────────────
         // Сохраняет ТОЛЬКО максимальный результат для каждого ника
         public static void AddScore(string nick, int score)
         {
-            if (score < 10) return; // минимум 10 очков для записи
+            if (score <= 0) return;
 
             var list = ReadFromFile();
 
@@ -199,18 +196,11 @@ namespace snakeclassic
             if (existingIndex >= 0)
             {
                 // Обновляем только если новый результат ЛУЧШЕ
-                if (score > list[existingIndex].Value)
-                {
-                    list[existingIndex] = new KeyValuePair<string, int>(nick, score);
-                }
-                else
-                {
-                    return; // Результат хуже — не сохраняем
-                }
+                if (score <= list[existingIndex].Value) return;
+                list[existingIndex] = new KeyValuePair<string, int>(nick, score);
             }
             else
             {
-                // Новый игрок
                 list.Add(new KeyValuePair<string, int>(nick, score));
             }
 
@@ -218,8 +208,7 @@ namespace snakeclassic
 
             try
             {
-                string dir = Path.GetDirectoryName(SavePath);
-                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                // Application.StartupPath всегда существует — Directory.CreateDirectory не нужен
                 File.WriteAllLines(SavePath, list.Select(x => $"{x.Key}|{x.Value}"));
             }
             catch { /* молча игнорируем */ }
