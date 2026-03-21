@@ -4,13 +4,6 @@
     {
         private System.ComponentModel.IContainer components = null;
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-                components.Dispose();
-            base.Dispose(disposing);
-        }
-
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
@@ -19,27 +12,24 @@
             this.lblNick = new System.Windows.Forms.Label();
             this.lblScore = new System.Windows.Forms.Label();
             this.lblLevel = new System.Windows.Forms.Label();
-
-            // ── BufferedPanel вместо обычной Panel — убирает мерцание ──
-            this.gamePanel = new snakeclassic.BufferedPanel();
-
+            this.gamePanel = new System.Windows.Forms.Panel();
             this.btnRestart = new System.Windows.Forms.Button();
             this.btnMenu = new System.Windows.Forms.Button();
 
             this.hudPanel.SuspendLayout();
             this.SuspendLayout();
 
-            // ── gameTimer ─────────────────────────────────────────────────
+            // ── gameTimer ─────────────────────────────────────────────
             this.gameTimer.Interval = 120;
+            this.gameTimer.Tick += new System.EventHandler(this.GameTimer_Tick);
 
-            // ── hudPanel ── яркая полоска, не похожая на игровое поле ────
+            // ── hudPanel ──────────────────────────────────────────────
             this.hudPanel.BackColor = System.Drawing.Color.FromArgb(50, 0, 80);
             this.hudPanel.Controls.Add(this.lblScore);
             this.hudPanel.Controls.Add(this.lblNick);
             this.hudPanel.Controls.Add(this.lblLevel);
             this.hudPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.hudPanel.Height = 42;
-            // Нижняя граница — яркая неоновая линия
             this.hudPanel.Paint += (s, e) =>
             {
                 e.Graphics.DrawLine(
@@ -47,38 +37,38 @@
                     0, 41, this.hudPanel.Width, 41);
             };
 
-            // ── lblNick ───────────────────────────────────────────────────
+            // ── lblNick ───────────────────────────────────────────────
             this.lblNick.AutoSize = false;
             this.lblNick.Dock = System.Windows.Forms.DockStyle.Left;
             this.lblNick.Width = 220;
             this.lblNick.ForeColor = System.Drawing.Color.FromArgb(220, 160, 255);
             this.lblNick.Font = new System.Drawing.Font("Segoe UI", 11,
-                                        System.Drawing.FontStyle.Bold);
+                                         System.Drawing.FontStyle.Bold);
             this.lblNick.Text = "👤 Игрок";
             this.lblNick.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblNick.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
 
-            // ── lblScore ──────────────────────────────────────────────────
+            // ── lblScore ──────────────────────────────────────────────
             this.lblScore.AutoSize = false;
             this.lblScore.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblScore.ForeColor = System.Drawing.Color.FromArgb(255, 230, 0);
             this.lblScore.Font = new System.Drawing.Font("Segoe UI", 14,
-                                         System.Drawing.FontStyle.Bold);
+                                          System.Drawing.FontStyle.Bold);
             this.lblScore.Text = "🍎 0";
             this.lblScore.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 
-            // ── lblLevel ──────────────────────────────────────────────────
+            // ── lblLevel ──────────────────────────────────────────────
             this.lblLevel.AutoSize = false;
             this.lblLevel.Dock = System.Windows.Forms.DockStyle.Right;
             this.lblLevel.Width = 110;
             this.lblLevel.ForeColor = System.Drawing.Color.FromArgb(0, 220, 255);
             this.lblLevel.Font = new System.Drawing.Font("Segoe UI", 11,
-                                         System.Drawing.FontStyle.Bold);
+                                          System.Drawing.FontStyle.Bold);
             this.lblLevel.Text = "⚡ Ур.1";
             this.lblLevel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.lblLevel.Padding = new System.Windows.Forms.Padding(0, 0, 12, 0);
 
-            // ── gamePanel ─────────────────────────────────────────────────
+            // ── gamePanel ─────────────────────────────────────────────
             this.gamePanel.BackColor = System.Drawing.Color.FromArgb(10, 2, 20);
             this.gamePanel.Location = new System.Drawing.Point(0, 42);
             this.gamePanel.Size = new System.Drawing.Size(640, 440);
@@ -87,9 +77,9 @@
                                      | System.Windows.Forms.AnchorStyles.Left
                                      | System.Windows.Forms.AnchorStyles.Right;
             this.gamePanel.Paint += new System.Windows.Forms.PaintEventHandler(
-                                           this.gamePanel_Paint);
+                                            this.gamePanel_Paint);
 
-            // ── btnRestart ────────────────────────────────────────────────
+            // ── btnRestart ────────────────────────────────────────────
             this.btnRestart.Text = "▶  РЕСТАРТ";
             this.btnRestart.Size = new System.Drawing.Size(160, 44);
             this.btnRestart.Location = new System.Drawing.Point(155, 494);
@@ -100,12 +90,12 @@
                 System.Drawing.Color.FromArgb(140, 0, 255);
             this.btnRestart.FlatAppearance.BorderSize = 2;
             this.btnRestart.Font = new System.Drawing.Font("Segoe UI", 11,
-                                            System.Drawing.FontStyle.Bold);
+                                          System.Drawing.FontStyle.Bold);
             this.btnRestart.Visible = false;
             this.btnRestart.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
 
-            // ── btnMenu ───────────────────────────────────────────────────
+            // ── btnMenu ───────────────────────────────────────────────
             this.btnMenu.Text = "⬅  МЕНЮ";
             this.btnMenu.Size = new System.Drawing.Size(160, 44);
             this.btnMenu.Location = new System.Drawing.Point(330, 494);
@@ -116,18 +106,18 @@
                 System.Drawing.Color.FromArgb(255, 60, 100);
             this.btnMenu.FlatAppearance.BorderSize = 2;
             this.btnMenu.Font = new System.Drawing.Font("Segoe UI", 11,
-                                         System.Drawing.FontStyle.Bold);
+                                       System.Drawing.FontStyle.Bold);
             this.btnMenu.Visible = false;
             this.btnMenu.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnMenu.Click += new System.EventHandler(this.btnMenu_Click);
 
-            // ── bottomPanel — чёрная полоса внизу под кнопками ───────────
+            // ── bottomPanel ───────────────────────────────────────────
             var bottomPanel = new System.Windows.Forms.Panel();
             bottomPanel.BackColor = System.Drawing.Color.FromArgb(20, 5, 35);
             bottomPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
             bottomPanel.Height = 54;
 
-            // ── Form1 ─────────────────────────────────────────────────────
+            // ── Form1 ─────────────────────────────────────────────────
             this.ClientSize = new System.Drawing.Size(640, 540);
             this.Controls.Add(this.gamePanel);
             this.Controls.Add(this.hudPanel);
@@ -140,6 +130,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.KeyPreview = true;
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
 
             this.hudPanel.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -150,7 +141,7 @@
         private System.Windows.Forms.Label lblNick;
         private System.Windows.Forms.Label lblScore;
         private System.Windows.Forms.Label lblLevel;
-        private snakeclassic.BufferedPanel gamePanel;
+        private System.Windows.Forms.Panel gamePanel;
         private System.Windows.Forms.Button btnRestart;
         private System.Windows.Forms.Button btnMenu;
     }

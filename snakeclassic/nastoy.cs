@@ -38,7 +38,7 @@ namespace snakeclassic
             skinPanels = new Panel[] { skinPanel0, skinPanel1, skinPanel2, skinPanel3 };
             foodPanels = new Panel[] { foodPanel0, foodPanel1 };
 
-            // Восстанавливаем текущий выбор при открытии
+            // Восстанавливаем текущий выбор при повторном открытии
             selectedSkin = nastoy.SelectedSkin;
             selectedFood = nastoy.SelectedFood;
 
