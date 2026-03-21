@@ -109,19 +109,19 @@
       <DependentUpon>nicknamefrm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -163,22 +163,10 @@
     <Resource Include="Assets\table_button.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\closebtn.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\exit_button.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\igra_button.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\nastroy_button.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\svernutbtn.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\table_button.png" />
+    <Resource Include="Assets\picturename.png" />
+    <Resource Include="Assets\picturenamenastoy.png" />
+    <Resource Include="Assets\picturenickname.png" />
+    <Resource Include="Assets\picturetable.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

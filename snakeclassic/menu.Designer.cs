@@ -36,9 +36,9 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.svernutbtn = new System.Windows.Forms.Button();
             this.closebtn = new System.Windows.Forms.Button();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.picturename = new System.Windows.Forms.PictureBox();
             this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picturename)).BeginInit();
             this.SuspendLayout();
             // 
             // igra_button
@@ -130,16 +130,16 @@
             this.closebtn.UseVisualStyleBackColor = true;
             this.closebtn.Click += new System.EventHandler(this.closebtn_Click);
             // 
-            // pictureBox1
+            // picturename
             // 
-            this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.BackgroundImage")));
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.pictureBox1.Location = new System.Drawing.Point(3, -77);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(864, 431);
-            this.pictureBox1.TabIndex = 5;
-            this.pictureBox1.TabStop = false;
+            this.picturename.BackColor = System.Drawing.Color.Transparent;
+            this.picturename.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("picturename.BackgroundImage")));
+            this.picturename.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.picturename.Location = new System.Drawing.Point(3, -77);
+            this.picturename.Name = "picturename";
+            this.picturename.Size = new System.Drawing.Size(864, 431);
+            this.picturename.TabIndex = 5;
+            this.picturename.TabStop = false;
             // 
             // menu
             // 
@@ -153,7 +153,7 @@
             this.Controls.Add(this.table_button);
             this.Controls.Add(this.nastroy_button);
             this.Controls.Add(this.igra_button);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.picturename);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.KeyPreview = true;
             this.MaximizeBox = false;
@@ -161,7 +161,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Load += new System.EventHandler(this.menu_Load);
             this.panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picturename)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -175,6 +175,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button closebtn;
         private System.Windows.Forms.Button svernutbtn;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox picturename;
     }
 }

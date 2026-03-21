@@ -22,7 +22,7 @@ namespace snakeclassic.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace snakeclassic.Properties {
         ///   Возвращает кэшированный экземпляр ResourceManager, использованный этим классом.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("snakeclassic.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace snakeclassic.Properties {
         ///   обращений к ресурсу с помощью этого класса ресурса со строгой типизацией.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap apple {
+        public static System.Drawing.Bitmap apple {
             get {
                 object obj = ResourceManager.GetObject("apple", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -73,7 +73,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap banana {
+        public static System.Drawing.Bitmap banana {
             get {
                 object obj = ResourceManager.GetObject("banana", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -83,7 +83,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap bg_stars {
+        public static System.Drawing.Bitmap bg_stars {
             get {
                 object obj = ResourceManager.GetObject("bg_stars", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -93,7 +93,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap btn_gotovo {
+        public static System.Drawing.Bitmap btn_gotovo {
             get {
                 object obj = ResourceManager.GetObject("btn_gotovo", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -103,7 +103,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap btn_nazad {
+        public static System.Drawing.Bitmap btn_nazad {
             get {
                 object obj = ResourceManager.GetObject("btn_nazad", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -113,7 +113,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap closebtn {
+        public static System.Drawing.Bitmap closebtn {
             get {
                 object obj = ResourceManager.GetObject("closebtn", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -123,7 +123,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap exit_button {
+        public static System.Drawing.Bitmap exit_button {
             get {
                 object obj = ResourceManager.GetObject("exit_button", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -133,7 +133,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap igra_button {
+        public static System.Drawing.Bitmap igra_button {
             get {
                 object obj = ResourceManager.GetObject("igra_button", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -143,7 +143,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap nastroy_button {
+        public static System.Drawing.Bitmap nastroy_button {
             get {
                 object obj = ResourceManager.GetObject("nastroy_button", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -153,7 +153,47 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap snake_blue {
+        public static System.Drawing.Bitmap picturename {
+            get {
+                object obj = ResourceManager.GetObject("picturename", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap picturenamenastoy {
+            get {
+                object obj = ResourceManager.GetObject("picturenamenastoy", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap picturenickname {
+            get {
+                object obj = ResourceManager.GetObject("picturenickname", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap picturetable {
+            get {
+                object obj = ResourceManager.GetObject("picturetable", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap snake_blue {
             get {
                 object obj = ResourceManager.GetObject("snake_blue", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -163,7 +203,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap snake_green {
+        public static System.Drawing.Bitmap snake_green {
             get {
                 object obj = ResourceManager.GetObject("snake_green", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -173,7 +213,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap snake_orange {
+        public static System.Drawing.Bitmap snake_orange {
             get {
                 object obj = ResourceManager.GetObject("snake_orange", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -183,7 +223,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap snake_red {
+        public static System.Drawing.Bitmap snake_red {
             get {
                 object obj = ResourceManager.GetObject("snake_red", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -193,7 +233,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap svernutbtn {
+        public static System.Drawing.Bitmap svernutbtn {
             get {
                 object obj = ResourceManager.GetObject("svernutbtn", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -203,7 +243,7 @@ namespace snakeclassic.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap table_button {
+        public static System.Drawing.Bitmap table_button {
             get {
                 object obj = ResourceManager.GetObject("table_button", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));

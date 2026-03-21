@@ -29,25 +29,25 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(leadbordfrm));
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.picturetable = new System.Windows.Forms.PictureBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.svernutbtn = new System.Windows.Forms.Button();
             this.closebtn = new System.Windows.Forms.Button();
             this.nazad_btn = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picturetable)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // pictureBox1
+            // picturetable
             // 
-            this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.BackgroundImage")));
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.pictureBox1.Location = new System.Drawing.Point(-45, -68);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(394, 302);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            this.picturetable.BackColor = System.Drawing.Color.Transparent;
+            this.picturetable.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("picturetable.BackgroundImage")));
+            this.picturetable.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.picturetable.Location = new System.Drawing.Point(-45, -68);
+            this.picturetable.Name = "picturetable";
+            this.picturetable.Size = new System.Drawing.Size(394, 302);
+            this.picturetable.TabIndex = 0;
+            this.picturetable.TabStop = false;
             // 
             // panel1
             // 
@@ -106,14 +106,14 @@
             this.ClientSize = new System.Drawing.Size(303, 450);
             this.Controls.Add(this.nazad_btn);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.picturetable);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "leadbordfrm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Load += new System.EventHandler(this.leadbordfrm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picturetable)).EndInit();
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -121,7 +121,7 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox picturetable;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button svernutbtn;
         private System.Windows.Forms.Button closebtn;

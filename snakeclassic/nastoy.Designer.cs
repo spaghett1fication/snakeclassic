@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(nastoy));
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.picturenamenastoy = new System.Windows.Forms.PictureBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.svernutbtn = new System.Windows.Forms.Button();
             this.closebtn = new System.Windows.Forms.Button();
@@ -41,7 +41,7 @@
             this.pictureBox7 = new System.Windows.Forms.PictureBox();
             this.btn_gotov = new System.Windows.Forms.Button();
             this.nazad_btn = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picturenamenastoy)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
@@ -51,16 +51,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox7)).BeginInit();
             this.SuspendLayout();
             // 
-            // pictureBox1
+            // picturenamenastoy
             // 
-            this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.BackgroundImage")));
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.pictureBox1.Location = new System.Drawing.Point(-114, -97);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(871, 452);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            this.picturenamenastoy.BackColor = System.Drawing.Color.Transparent;
+            this.picturenamenastoy.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("picturenamenastoy.BackgroundImage")));
+            this.picturenamenastoy.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.picturenamenastoy.Location = new System.Drawing.Point(-114, -97);
+            this.picturenamenastoy.Name = "picturenamenastoy";
+            this.picturenamenastoy.Size = new System.Drawing.Size(871, 452);
+            this.picturenamenastoy.TabIndex = 0;
+            this.picturenamenastoy.TabStop = false;
             // 
             // panel1
             // 
@@ -211,7 +211,7 @@
             this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.picturenamenastoy);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -219,7 +219,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "nastoy";
             this.Load += new System.EventHandler(this.nastoy_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picturenamenastoy)).EndInit();
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
@@ -233,7 +233,7 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox picturenamenastoy;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button svernutbtn;
         private System.Windows.Forms.Button closebtn;
