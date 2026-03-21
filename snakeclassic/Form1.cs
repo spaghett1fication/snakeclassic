@@ -20,29 +20,33 @@ namespace snakeclassic
         private bool gameOver = false;
         private bool paused = false;
 
-        // Шрифт для эмодзи-еды (рисуем через Graphics, не через Label.Text)
         private Font emojiFont;
+        private Font scoreFont;
 
         private enum Direction { Up, Down, Left, Right }
 
-        // ── Цвета змейки по скину ────────────────────────────────────
+        // ── Порядок совпадает с nastoy:
+        //    skinPanel0 = Зелёная  (0)
+        //    skinPanel1 = Оранжевая(1)
+        //    skinPanel2 = Красная  (2)
+        //    skinPanel3 = Синяя    (3)
         private static readonly Color[] HeadColors =
         {
-            Color.FromArgb(0,   255, 80),   // 0 Зелёная
-            Color.FromArgb(0,   150, 255),  // 1 Синяя
-            Color.FromArgb(255, 140, 0),    // 2 Оранжевая
-            Color.FromArgb(255, 50,  50),   // 3 Красная
+            Color.FromArgb(0,   220,  60),   // 0 Зелёная
+            Color.FromArgb(255, 140,   0),   // 1 Оранжевая
+            Color.FromArgb(220,  30,  30),   // 2 Красная
+            Color.FromArgb(0,   140, 255),   // 3 Синяя
         };
         private static readonly Color[] BodyColors =
         {
-            Color.FromArgb(0,   200, 50),
-            Color.FromArgb(0,   100, 220),
-            Color.FromArgb(220, 100, 0),
-            Color.FromArgb(200, 30,  30),
+            Color.FromArgb(0,   180,  40),   // 0 Зелёная
+            Color.FromArgb(210, 110,   0),   // 1 Оранжевая
+            Color.FromArgb(180,  20,  20),   // 2 Красная
+            Color.FromArgb(0,   100, 220),   // 3 Синяя
         };
 
-        // ── Стикеры еды ──────────────────────────────────────────────
-        private static readonly string[] FoodEmojis = { "🍎", "🍌" };
+        // ── foodPanel0 = Банан (0), foodPanel1 = Яблоко (1)
+        private static readonly string[] FoodEmojis = { "🍌", "🍎" };
 
         [DllImport("user32.Dll", EntryPoint = "ReleaseCapture")]
         private extern static void ReleaseCapture();
@@ -52,22 +56,19 @@ namespace snakeclassic
         public Form1()
         {
             InitializeComponent();
-
-            // Двойная буферизация формы
             this.SetStyle(
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.UserPaint |
-                ControlStyles.OptimizedDoubleBuffer,
-                true);
+                ControlStyles.OptimizedDoubleBuffer, true);
             this.UpdateStyles();
 
-            // Шрифт Segoe UI Emoji для корректного рендера эмодзи через Graphics
-            emojiFont = new Font("Segoe UI Emoji", 13f);
+            emojiFont = new Font("Segoe UI Emoji", 15f);
+            scoreFont = new Font("Segoe UI", 14f, FontStyle.Bold);
         }
 
         private void Form1_Load(object sender, EventArgs e) => StartGame();
 
-        // ── Старт игры ───────────────────────────────────────────────
+        // ── Старт ────────────────────────────────────────────────────
         private void StartGame()
         {
             score = 0;
@@ -95,16 +96,11 @@ namespace snakeclassic
             }
             catch { lblNick.Text = "Игрок"; }
 
-            // Счёт — только число, без эмодзи (Label не умеет рисовать эмодзи)
-            UpdateScoreLabel();
             lblLevel.Text = "Ур.1";
-
             gameTimer.Interval = 120;
             gameTimer.Start();
-
             btnRestart.Visible = false;
             btnMenu.Visible = false;
-
             gamePanel.Invalidate();
             hudPanel.Invalidate();
         }
@@ -115,16 +111,9 @@ namespace snakeclassic
             int rows = gamePanel.Height / CellSize;
             do
             {
-                food = new Point(rand.Next(0, cols) * CellSize, rand.Next(0, rows) * CellSize);
-            }
-            while (snake.Contains(food));
-        }
-
-        // Счёт — только цифры, без эмодзи в тексте Label
-        private void UpdateScoreLabel()
-        {
-            lblScore.Text = score.ToString();
-            hudPanel.Invalidate(); // перерисовываем HUD чтобы обновить иконку еды
+                food = new Point(rand.Next(0, cols) * CellSize,
+                                 rand.Next(0, rows) * CellSize);
+            } while (snake.Contains(food));
         }
 
         // ── Таймер ───────────────────────────────────────────────────
@@ -162,10 +151,10 @@ namespace snakeclassic
             {
                 score += 10;
                 int level = score / 50 + 1;
-                UpdateScoreLabel();
                 lblLevel.Text = $"Ур.{level}";
                 if (level > 1) gameTimer.Interval = Math.Max(40, 120 - (level - 1) * 10);
                 GenerateFood();
+                hudPanel.Invalidate();   // обновляем HUD
             }
             else
             {
@@ -235,17 +224,10 @@ namespace snakeclassic
         private void GoToMenu()
         {
             gameTimer.Stop();
-            // Ищем существующее меню среди открытых форм
             foreach (Form f in Application.OpenForms)
             {
-                if (f is menu)
-                {
-                    f.Show();
-                    this.Hide();
-                    return;
-                }
+                if (f is menu) { f.Show(); this.Hide(); return; }
             }
-            // Если не нашли — создаём новое
             menu m = new menu();
             m.Show();
             this.Hide();
@@ -263,26 +245,43 @@ namespace snakeclassic
             }
         }
 
-        // ── Отрисовка HUD (счёт + иконка еды через Graphics) ─────────
+        // ── HUD: счёт + иконка еды строго по центру ─────────────────
         private void hudPanel_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
-            // Иконка еды — рисуем эмодзи через Graphics с Segoe UI Emoji
-            string foodEmoji = FoodEmojis[nastoy.SelectedFood];
+            string emoji = FoodEmojis[nastoy.SelectedFood];
+            string scoreText = score.ToString();
 
-            // Позиция: слева от числа счёта, по центру hudPanel по вертикали
-            float emojiX = hudPanel.Width / 2f - 45f;
-            float emojiY = (hudPanel.Height - emojiFont.Height) / 2f - 2f;
-            g.DrawString(foodEmoji, emojiFont, Brushes.White, emojiX, emojiY);
+            // Измеряем ширину иконки и текста
+            SizeF emojiSize = g.MeasureString(emoji, emojiFont);
+            SizeF scoreSize = g.MeasureString(scoreText, scoreFont);
 
-            // Разделительная линия снизу
+            float gap = 4f;
+            float totalWidth = emojiSize.Width + gap + scoreSize.Width;
+            float startX = (hudPanel.Width - totalWidth) / 2f;
+            float centerY = hudPanel.Height / 2f;
+
+            float emojiY = centerY - emojiSize.Height / 2f - 1f;
+            float scoreY = centerY - scoreSize.Height / 2f;
+
+            // Рисуем иконку еды
+            g.DrawString(emoji, emojiFont, Brushes.White,
+                         startX, emojiY);
+
+            // Рисуем счёт
+            using (SolidBrush scoreBrush = new SolidBrush(Color.FromArgb(255, 230, 0)))
+                g.DrawString(scoreText, scoreFont, scoreBrush,
+                             startX + emojiSize.Width + gap, scoreY);
+
+            // Разделитель снизу
             using (Pen pen = new Pen(Color.FromArgb(180, 0, 255), 2))
-                g.DrawLine(pen, 0, hudPanel.Height - 1, hudPanel.Width, hudPanel.Height - 1);
+                g.DrawLine(pen, 0, hudPanel.Height - 1,
+                                hudPanel.Width, hudPanel.Height - 1);
         }
 
-        // ── Отрисовка игрового поля ───────────────────────────────────
+        // ── Игровое поле ─────────────────────────────────────────────
         private void gamePanel_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -300,11 +299,11 @@ namespace snakeclassic
                     g.DrawLine(gridPen, 0, y, gamePanel.Width, y);
             }
 
-            // ── Еда (эмодзи через Segoe UI Emoji) ────────────────────
-            string emoji = FoodEmojis[nastoy.SelectedFood];
-            g.DrawString(emoji, emojiFont, Brushes.White, food.X - 1, food.Y - 2);
+            // Еда — эмодзи стикер
+            string foodEmoji = FoodEmojis[nastoy.SelectedFood];
+            g.DrawString(foodEmoji, emojiFont, Brushes.White, food.X - 2, food.Y - 2);
 
-            // ── Змейка (цвет по скину) ────────────────────────────────
+            // Змейка
             int skin = nastoy.SelectedSkin;
             if (skin < 0 || skin >= HeadColors.Length) skin = 0;
 
@@ -312,7 +311,6 @@ namespace snakeclassic
             {
                 bool isHead = (i == 0);
                 Color c = isHead ? HeadColors[skin] : BodyColors[skin];
-
                 Rectangle rect = new Rectangle(
                     snake[i].X + 1, snake[i].Y + 1,
                     CellSize - 2, CellSize - 2);
@@ -339,12 +337,11 @@ namespace snakeclassic
                 }
             }
 
-            // ── Пауза ─────────────────────────────────────────────────
+            // Пауза
             if (paused && !gameOver)
             {
                 using (SolidBrush dim = new SolidBrush(Color.FromArgb(140, 0, 0, 0)))
                     g.FillRectangle(dim, 0, 0, gamePanel.Width, gamePanel.Height);
-
                 using (Font f = new Font("Segoe UI", 28, FontStyle.Bold))
                 {
                     string txt = "ПАУЗА";
@@ -355,7 +352,7 @@ namespace snakeclassic
                 }
             }
 
-            // ── Game Over ─────────────────────────────────────────────
+            // Game Over
             if (gameOver)
             {
                 using (SolidBrush dim = new SolidBrush(Color.FromArgb(170, 0, 0, 0)))
@@ -380,10 +377,14 @@ namespace snakeclassic
                     SizeF s3 = g.MeasureString(t3, fSmall);
                     SizeF s4 = g.MeasureString(t4, fSmall);
 
-                    g.DrawString(t1, fBig, Brushes.Yellow, cx - s1.Width / 2f, cy - 95);
-                    g.DrawString(t2, fMed, Brushes.LightGreen, cx - s2.Width / 2f, cy - 45);
-                    g.DrawString(t3, fSmall, Brushes.Plum, cx - s3.Width / 2f, cy + 5);
-                    g.DrawString(t4, fSmall, Brushes.LightGray, cx - s4.Width / 2f, cy + 35);
+                    g.DrawString(t1, fBig, Brushes.Yellow,
+                        cx - s1.Width / 2f, cy - 95);
+                    g.DrawString(t2, fMed, Brushes.LightGreen,
+                        cx - s2.Width / 2f, cy - 45);
+                    g.DrawString(t3, fSmall, Brushes.Plum,
+                        cx - s3.Width / 2f, cy + 5);
+                    g.DrawString(t4, fSmall, Brushes.LightGray,
+                        cx - s4.Width / 2f, cy + 35);
                 }
             }
         }
@@ -391,8 +392,8 @@ namespace snakeclassic
         protected override void Dispose(bool disposing)
         {
             emojiFont?.Dispose();
-            if (disposing && components != null)
-                components.Dispose();
+            scoreFont?.Dispose();
+            if (disposing && components != null) components.Dispose();
             base.Dispose(disposing);
         }
     }

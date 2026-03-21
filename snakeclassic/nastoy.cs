@@ -31,19 +31,18 @@ namespace snakeclassic
         [DllImport("user32.Dll", EntryPoint = "ReleaseCapture")]
         private extern static void ReleaseCapture();
         [DllImport("user32.Dll", EntryPoint = "SendMessage")]
-        private extern static void SendMessage(System.IntPtr hWnd, int wMsg, int wParam, int lParam);
+        private extern static void SendMessage(IntPtr hWnd, int wMsg, int wParam, int lParam);
 
         private void nastoy_Load(object sender, EventArgs e)
         {
             skinPanels = new Panel[] { skinPanel0, skinPanel1, skinPanel2, skinPanel3 };
             foodPanels = new Panel[] { foodPanel0, foodPanel1 };
 
-            // Восстанавливаем текущий выбор при каждом открытии
+            // Восстанавливаем текущий выбор из статических полей
             selectedSkin = nastoy.SelectedSkin;
             selectedFood = nastoy.SelectedFood;
 
-            // Подписываем клики на панели И все дочерние контролы внутри
-            // (иначе клик по картинке/лейблу не доходит до Panel)
+            // Подписываем клики на панели И на все дочерние контролы
             foreach (Panel p in skinPanels)
             {
                 p.Click += skinPanel_Click;
@@ -119,15 +118,13 @@ namespace snakeclassic
         }
 
         // ── Кнопка Готово ─────────────────────────────────────────────
-        // ВАЖНО: используем Hide() а не Close() — Close() уничтожает форму
-        // и сбрасывает static поля при следующем открытии через new nastoy()
         private void btn_gotov_Click(object sender, EventArgs e)
         {
-            // Сохраняем выбор в static поля — Form1 их прочитает
+            // Сохраняем выбор в статические поля
             nastoy.SelectedSkin = selectedSkin;
             nastoy.SelectedFood = selectedFood;
 
-            // Возвращаем menu (она была скрыта когда открывали nastoy)
+            // Показываем menu и закрываем настройки
             foreach (Form f in Application.OpenForms)
             {
                 if (f is menu)
@@ -137,7 +134,7 @@ namespace snakeclassic
                 }
             }
 
-            this.Hide();
+            this.Hide(); // Hide вместо Close — форма живёт, static поля не сбрасываются
         }
 
         private void btn_gotov_MouseEnter(object sender, EventArgs e)
@@ -153,7 +150,7 @@ namespace snakeclassic
         // ── Кнопка Назад ──────────────────────────────────────────────
         private void nazad_btn_Click(object sender, EventArgs e)
         {
-            // Не сохраняем — просто возвращаемся в меню
+            // НЕ сохраняем — просто возвращаемся
             foreach (Form f in Application.OpenForms)
             {
                 if (f is menu)
@@ -175,7 +172,7 @@ namespace snakeclassic
             nazad_btn.Location = new Point(nazad_btn.Location.X, nazad_btn.Location.Y - 2);
         }
 
-        // ── Шапка: свернуть / закрыть / перетаскивание ────────────────
+        // ── Шапка ─────────────────────────────────────────────────────
         private void svernutbtn_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
@@ -191,7 +188,7 @@ namespace snakeclassic
             if (e.Button == MouseButtons.Left)
             {
                 ReleaseCapture();
-                SendMessage(this.Handle, 0x112, 0xf012, 0);
+                SendMessage(FindForm().Handle, 0x112, 0xf012, 0);
             }
         }
     }
