@@ -11,7 +11,7 @@ namespace snakeclassic
 {
     public partial class leadbordfrm : Form
     {
-        // public static — доступен из Form1.cs
+        // ── Путь к файлу — публичный static ─────────────────────────────
         public static readonly string SavePath =
             Path.Combine(@"D:\Visual Studio\course\snakeclassic", "leaderboard.txt");
 
@@ -50,67 +50,53 @@ namespace snakeclassic
         // ── Load ────────────────────────────────────────────────────────
         private void leadbordfrm_Load(object sender, EventArgs e)
         {
-            nazad_btn.MouseEnter += (s, ev) =>
-                nazad_btn.Location = new Point(nazad_btn.Location.X + 2, nazad_btn.Location.Y + 2);
-            nazad_btn.MouseLeave += (s, ev) =>
-                nazad_btn.Location = new Point(nazad_btn.Location.X - 2, nazad_btn.Location.Y - 2);
+            nazad_btn.MouseEnter += (s, ev) => nazad_btn.Location = new Point(nazad_btn.Location.X + 2, nazad_btn.Location.Y + 2);
+            nazad_btn.MouseLeave += (s, ev) => nazad_btn.Location = new Point(nazad_btn.Location.X - 2, nazad_btn.Location.Y - 2);
 
-            lblTitle.Paint += new PaintEventHandler(lblTitle_Paint);
+            this.lblTitle.Paint += new PaintEventHandler(lblTitle_Paint);
 
             LoadLeaderboard();
         }
 
-        // ── Paint заголовка (свечение) ───────────────────────────────────
+        // ── Paint заголовка ─────────────────────────────────────────────
         private void lblTitle_Paint(object sender, PaintEventArgs e)
         {
+            var lbl = sender as Label;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
+            // Фиолетовое свечение
             using (var shadowBrush = new SolidBrush(Color.FromArgb(120, 180, 0, 255)))
             {
                 for (int dx = -2; dx <= 2; dx++)
                     for (int dy = -2; dy <= 2; dy++)
                         if (dx != 0 || dy != 0)
-                            e.Graphics.DrawString(lblTitle.Text, lblTitle.Font, shadowBrush,
-                                new RectangleF(dx, dy, lblTitle.Width, lblTitle.Height),
-                                new StringFormat
-                                {
-                                    Alignment = StringAlignment.Center,
-                                    LineAlignment = StringAlignment.Center
-                                });
+                            e.Graphics.DrawString(lbl.Text, lbl.Font, shadowBrush,
+                                new RectangleF(dx, dy, lbl.Width, lbl.Height),
+                                new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
             }
 
-            using (var mainBrush = new SolidBrush(Color.FromArgb(255, 220, 255, 255)))
+            // Основной текст — белый
+            using (var mainBrush = new SolidBrush(Color.White))
             {
-                e.Graphics.DrawString(lblTitle.Text, lblTitle.Font, mainBrush,
-                    new RectangleF(0, 0, lblTitle.Width, lblTitle.Height),
-                    new StringFormat
-                    {
-                        Alignment = StringAlignment.Center,
-                        LineAlignment = StringAlignment.Center
-                    });
+                e.Graphics.DrawString(lbl.Text, lbl.Font, mainBrush,
+                    new RectangleF(0, 0, lbl.Width, lbl.Height),
+                    new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
             }
         }
 
-        // ── Загрузка таблицы ────────────────────────────────────────────
+        // ── Загрузка таблицы в listView ─────────────────────────────────
         private void LoadLeaderboard()
         {
-            flowPanel.Controls.Clear();
-
+            leaderView.Items.Clear();
             var list = ReadFromFile();
 
             if (list.Count == 0)
             {
-                Label empty = new Label
-                {
-                    Text = "Пока нет результатов...",
-                    ForeColor = Color.Gray,
-                    Font = new Font("Arial", 12, FontStyle.Italic),
-                    AutoSize = false,
-                    Width = flowPanel.Width,
-                    Height = 40,
-                    TextAlign = ContentAlignment.MiddleCenter
-                };
-                flowPanel.Controls.Add(empty);
+                var empty = new ListViewItem("—");
+                empty.SubItems.Add("Пока нет результатов...");
+                empty.SubItems.Add("—");
+                empty.ForeColor = Color.Gray;
+                leaderView.Items.Add(empty);
                 return;
             }
 
@@ -118,61 +104,28 @@ namespace snakeclassic
 
             for (int i = 0; i < list.Count; i++)
             {
-                string medal = (i < 3) ? medals[i] : $"{i + 1}.";
-                Color rowColor = (i % 2 == 0)
-                    ? Color.FromArgb(40, 20, 70)
-                    : Color.FromArgb(55, 30, 90);
+                string place = (i < 3) ? medals[i] : $"  {i + 1}.";
+                var item = new ListViewItem(place);
+                item.SubItems.Add(list[i].Key);
+                item.SubItems.Add(list[i].Value.ToString());
 
-                Panel row = new Panel
-                {
-                    Width = flowPanel.Width - 10,
-                    Height = 36,
-                    BackColor = rowColor,
-                    Margin = new Padding(0, 2, 0, 2)
-                };
+                // Топ-3 — особые цвета
+                if (i == 0) item.ForeColor = Color.Gold;
+                else if (i == 1) item.ForeColor = Color.Silver;
+                else if (i == 2) item.ForeColor = Color.FromArgb(205, 127, 50);
+                else item.ForeColor = Color.LightCyan;
 
-                Label lMedal = new Label
-                {
-                    Text = medal,
-                    Width = 50,
-                    Height = 36,
-                    Location = new Point(5, 0),
-                    ForeColor = Color.Gold,
-                    Font = new Font("Arial", 13, FontStyle.Bold),
-                    TextAlign = ContentAlignment.MiddleCenter
-                };
+                // Чередующийся фон
+                item.BackColor = (i % 2 == 0)
+                    ? Color.FromArgb(40, 15, 80)
+                    : Color.FromArgb(55, 20, 100);
 
-                Label lNick = new Label
-                {
-                    Text = list[i].Key,
-                    Width = 200,
-                    Height = 36,
-                    Location = new Point(60, 0),
-                    ForeColor = Color.White,
-                    Font = new Font("Arial", 12),
-                    TextAlign = ContentAlignment.MiddleLeft
-                };
-
-                Label lScore = new Label
-                {
-                    Text = list[i].Value.ToString(),
-                    Width = 100,
-                    Height = 36,
-                    Location = new Point(270, 0),
-                    ForeColor = Color.LightGreen,
-                    Font = new Font("Arial", 12, FontStyle.Bold),
-                    TextAlign = ContentAlignment.MiddleRight
-                };
-
-                row.Controls.Add(lMedal);
-                row.Controls.Add(lNick);
-                row.Controls.Add(lScore);
-                flowPanel.Controls.Add(row);
+                leaderView.Items.Add(item);
             }
         }
 
-        // ── Чтение из файла ─────────────────────────────────────────────
-        private static List<KeyValuePair<string, int>> ReadFromFile()
+        // ── Чтение файла — PUBLIC STATIC ────────────────────────────────
+        public static List<KeyValuePair<string, int>> ReadFromFile()
         {
             var list = new List<KeyValuePair<string, int>>();
             if (!File.Exists(SavePath)) return list;
@@ -181,28 +134,29 @@ namespace snakeclassic
             {
                 var parts = line.Split('|');
                 if (parts.Length == 2 && int.TryParse(parts[1], out int s))
-                    list.Add(new KeyValuePair<string, int>(parts[0], s));
+                    list.Add(new KeyValuePair<string, int>(parts[0].Trim(), s));
             }
+
             return list.OrderByDescending(x => x.Value).ToList();
         }
 
-        // ── Добавление результата ────────────────────────────────────────
-        // Для каждого ника сохраняется ТОЛЬКО максимальный результат
+        // ── Добавление результата — PUBLIC STATIC ───────────────────────
+        // Сохраняет ТОЛЬКО максимальный результат для каждого ника
         public static void AddScore(string nick, int score)
         {
             if (score <= 0) return;
 
             var list = ReadFromFile();
 
-            // Ищем существующую запись для этого ника
-            int idx = list.FindIndex(x =>
+            // Ищем запись с таким же ником
+            int existingIndex = list.FindIndex(x =>
                 string.Equals(x.Key, nick, StringComparison.OrdinalIgnoreCase));
 
-            if (idx >= 0)
+            if (existingIndex >= 0)
             {
                 // Обновляем только если новый результат ЛУЧШЕ
-                if (score <= list[idx].Value) return;
-                list.RemoveAt(idx);
+                if (score <= list[existingIndex].Value) return;
+                list.RemoveAt(existingIndex);
             }
 
             list.Add(new KeyValuePair<string, int>(nick, score));
@@ -210,10 +164,13 @@ namespace snakeclassic
 
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(SavePath));
+                string dir = Path.GetDirectoryName(SavePath);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
                 File.WriteAllLines(SavePath, list.Select(x => $"{x.Key}|{x.Value}"));
             }
-            catch { }
+            catch { /* молча игнорируем */ }
         }
     }
 }
