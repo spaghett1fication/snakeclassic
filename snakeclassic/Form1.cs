@@ -96,6 +96,7 @@ namespace snakeclassic
             diamondDespawnTimer = new Timer();
             diamondDespawnTimer.Interval = 5000;
             diamondDespawnTimer.Tick += DiamondDespawnTimer_Tick;
+
         }
 
         private void Form1_Load(object sender, EventArgs e) => StartGame();
@@ -443,8 +444,11 @@ namespace snakeclassic
 
             // Фон
             g.Clear(Color.FromArgb(15, 5, 30));
-            starField.Update();
-            starField.Draw(g);
+            if (starField != null)
+            {
+                starField.Update();
+                starField.Draw(g);
+            }
 
             // Сетка
             using (Pen gridPen = new Pen(Color.FromArgb(25, 255, 255, 255)))

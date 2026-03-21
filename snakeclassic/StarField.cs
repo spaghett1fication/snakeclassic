@@ -1,95 +1,87 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 
 namespace snakeclassic
 {
     public class StarField
     {
-        // ── Структура одной звезды ──────────────────────────────────
-        private struct Star
-        {
-            public int X;
-            public int Y;
-            public int BaseAlpha;   // базовая яркость (очень низкая)
-            public float Phase;     // текущая фаза мерцания
-            public float Speed;     // скорость мерцания (у каждой своя)
-            public byte R, G, B;    // цвет (чуть различается)
-        }
+        private int count;
+        private int[] xPos;
+        private int[] yPos;
+        private int[] baseAlpha;
+        private float[] phase;
+        private float[] speed;
+        private byte[] colR;
+        private byte[] colG;
+        private byte[] colB;
+        private int[] size;       // 1 или 2 пикселя
 
-        private Star[] stars;
-
-        // ────────────────────────────────────────────────────────────
-        //  Конструктор
-        //    width, height — размер gamePanel (800, 460)
-        //    count         — кол-во звёзд (по умолчанию 90, не много)
-        // ────────────────────────────────────────────────────────────
-        public StarField(int width, int height, int count = 90)
+        public StarField(int width, int height, int count = 140)
         {
+            this.count = count;
             Random rnd = new Random();
-            stars = new Star[count];
+
+            xPos = new int[count];
+            yPos = new int[count];
+            baseAlpha = new int[count];
+            phase = new float[count];
+            speed = new float[count];
+            colR = new byte[count];
+            colG = new byte[count];
+            colB = new byte[count];
+            size = new int[count];
 
             for (int i = 0; i < count; i++)
             {
-                // Случайный холодный оттенок: белый / голубоватый / сиреневатый
-                int colorType = rnd.Next(5);
-                byte r, g, b;
+                xPos[i] = rnd.Next(0, width);
+                yPos[i] = rnd.Next(0, height);
+
+                // Базовая яркость — ощутимая, но не кричащая
+                baseAlpha[i] = rnd.Next(50, 1500);
+
+                phase[i] = (float)(rnd.NextDouble() * Math.PI * 2);
+                speed[i] = 0.02f + (float)(rnd.NextDouble() * 0.07f);
+
+                // Большинство — 1px, ~20% — 2px для глубины
+                size[i] = rnd.Next(100) < 20 ? 2 : 1;
+
+                // Холодные оттенки: голубой / сиреневый / белый
+                int colorType = rnd.Next(6);
                 switch (colorType)
                 {
-                    case 0: r = 180; g = 190; b = 255; break; // голубоватая
-                    case 1: r = 200; g = 180; b = 255; break; // сиреневая
-                    case 2: r = 255; g = 240; b = 200; break; // тёплая (редко)
-                    default: r = 210; g = 215; b = 230; break; // почти белая
+                    case 0: colR[i] = 160; colG[i] = 185; colB[i] = 255; break; // голубая
+                    case 1: colR[i] = 190; colG[i] = 170; colB[i] = 255; break; // сиреневая
+                    case 2: colR[i] = 130; colG[i] = 200; colB[i] = 255; break; // ледяная
+                    default: colR[i] = 200; colG[i] = 210; colB[i] = 235; break; // бело-голубая
                 }
-
-                stars[i] = new Star
-                {
-                    X = rnd.Next(0, width),
-                    Y = rnd.Next(0, height),
-                    BaseAlpha = rnd.Next(12, 38),                         // очень тусклые
-                    Phase = (float)(rnd.NextDouble() * Math.PI * 2),
-                    Speed = 0.015f + (float)(rnd.NextDouble() * 0.06f), // медленное мерцание
-                    R = r,
-                    G = g,
-                    B = b
-                };
             }
         }
 
-        // ────────────────────────────────────────────────────────────
-        //  Update()  —  сдвигает фазу мерцания каждой звезды
-        // ────────────────────────────────────────────────────────────
         public void Update()
         {
-            for (int i = 0; i < stars.Length; i++)
+            for (int i = 0; i < count; i++)
             {
-                stars[i].Phase += stars[i].Speed;
-                if (stars[i].Phase > 6.2831853f)        // 2π
-                    stars[i].Phase -= 6.2831853f;
+                phase[i] += speed[i];
+                if (phase[i] > 6.2831853f)
+                    phase[i] -= 6.2831853f;
             }
         }
 
-        // ────────────────────────────────────────────────────────────
-        //  Draw()  —  рисует звёзды (1 пиксель каждая, очень тихо)
-        // ────────────────────────────────────────────────────────────
         public void Draw(Graphics g)
         {
-            for (int i = 0; i < stars.Length; i++)
+            for (int i = 0; i < count; i++)
             {
-                ref Star s = ref stars[i];
+                float twinkle = (float)(Math.Sin(phase[i]) * 0.5 + 0.5);
 
-                // sin даёт плавное мерцание 0 … 1
-                float twinkle = (float)(Math.Sin(s.Phase) * 0.5 + 0.5);
-
-                // Итоговый альфа: от почти невидимого до «чуть видно»
-                int alpha = (int)(s.BaseAlpha * (0.2f + 0.8f * twinkle));
-                if (alpha < 2) alpha = 2;
-                if (alpha > 45) alpha = 45;   // потолок — звёзды НИКОГДА не будут яркими
+                // Альфа: от 30% базы до 100% базы
+                int alpha = (int)(baseAlpha[i] * (0.3f + 0.7f * twinkle));
+                if (alpha < 10) alpha = 10;
+                if (alpha > 180) alpha = 180;
 
                 using (SolidBrush brush = new SolidBrush(
-                           Color.FromArgb(alpha, s.R, s.G, s.B)))
+                           Color.FromArgb(alpha, colR[i], colG[i], colB[i])))
                 {
-                    g.FillRectangle(brush, s.X, s.Y, 1, 1);
+                    g.FillRectangle(brush, xPos[i], yPos[i], size[i], size[i]);
                 }
             }
         }
