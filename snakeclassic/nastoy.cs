@@ -8,18 +8,16 @@ namespace snakeclassic
     public partial class nastoy : Form
     {
         // ── Публичные статические поля — читаются из Form1 ────────────
-        public static int SelectedSkin = 0;   // 0=Зелёная, 1=Синяя, 2=Оранжевая, 3=Красная
-        public static int SelectedFood = 0;   // 0=Яблоко 🍎, 1=Банан 🍌
+        public static int SelectedSkin = 0;   // 0=Зелёная 1=Синяя 2=Оранжевая 3=Красная
+        public static int SelectedFood = 0;   // 0=Яблоко  1=Банан
 
-        // Индексы выбранного скина и еды
+        // Локальные для UI
         private int selectedSkin = 0;
         private int selectedFood = 0;
 
-        // Цвета карточек
         private readonly Color colorNormal = Color.FromArgb(60, 20, 100);
         private readonly Color colorSelected = Color.FromArgb(120, 40, 200);
 
-        // Массивы панелей для удобного перебора
         private Panel[] skinPanels;
         private Panel[] foodPanels;
 
@@ -40,15 +38,15 @@ namespace snakeclassic
             skinPanels = new Panel[] { skinPanel0, skinPanel1, skinPanel2, skinPanel3 };
             foodPanels = new Panel[] { foodPanel0, foodPanel1 };
 
-            // Восстановить текущий выбор при повторном открытии настроек
-            selectedSkin = SelectedSkin;
-            selectedFood = SelectedFood;
+            // Восстанавливаем текущий выбор при открытии
+            selectedSkin = nastoy.SelectedSkin;
+            selectedFood = nastoy.SelectedFood;
 
             RefreshSkinHighlight();
             RefreshFoodHighlight();
         }
 
-        // ── Выбор скина ────────────────────────────────────────────────
+        // ── Выбор скина ───────────────────────────────────────────────
         private void skinPanel_Click(object sender, EventArgs e)
         {
             Control src = sender as Control;
@@ -72,7 +70,7 @@ namespace snakeclassic
                 skinPanels[i].BackColor = (i == selectedSkin) ? colorSelected : colorNormal;
         }
 
-        // ── Выбор еды ──────────────────────────────────────────────────
+        // ── Выбор еды ─────────────────────────────────────────────────
         private void foodPanel_Click(object sender, EventArgs e)
         {
             Control src = sender as Control;
@@ -96,11 +94,11 @@ namespace snakeclassic
                 foodPanels[i].BackColor = (i == selectedFood) ? colorSelected : colorNormal;
         }
 
-        // ── Кнопка Готово — сохраняет выбор в статические поля ────────
+        // ── Кнопка Готово — сохраняем выбор в static поля ────────────
         private void btn_gotov_Click(object sender, EventArgs e)
         {
-            SelectedSkin = selectedSkin;
-            SelectedFood = selectedFood;
+            nastoy.SelectedSkin = selectedSkin;
+            nastoy.SelectedFood = selectedFood;
             this.Close();
         }
 
@@ -114,7 +112,7 @@ namespace snakeclassic
             btn_gotov.Location = new Point(btn_gotov.Location.X, btn_gotov.Location.Y - 2);
         }
 
-        // ── Кнопка Назад ───────────────────────────────────────────────
+        // ── Кнопка Назад ──────────────────────────────────────────────
         private void nazad_btn_Click(object sender, EventArgs e)
         {
             menu form = new menu();
@@ -132,7 +130,7 @@ namespace snakeclassic
             nazad_btn.Location = new Point(nazad_btn.Location.X, nazad_btn.Location.Y - 2);
         }
 
-        // ── Шапка: свернуть / закрыть / перетаскивание ─────────────────
+        // ── Шапка: свернуть / закрыть / перетаскивание ────────────────
         private void svernutbtn_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
