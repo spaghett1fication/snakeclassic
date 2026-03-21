@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows.Forms;
 
 namespace snakeclassic
@@ -28,22 +24,18 @@ namespace snakeclassic
         public Form1()
         {
             InitializeComponent();
-            this.DoubleBuffered = true; // Убирает мерцание
+            this.DoubleBuffered = true;
             this.KeyDown += Form1_KeyDown;
             gameTimer.Tick += GameTimer_Tick;
-            //  НОВОЕ: идеальные размеры формы (кратны CellSize)
-            this.ClientSize = new Size(40 * CellSize, 30 * CellSize);  // 800x600
-
-            //  НОВОЕ: сразу генерируем первую еду
+            this.ClientSize = new Size(40 * CellSize, 30 * CellSize); // 800x600
             StartGame();
-
-
         }
 
         private void Form1_Shown(object sender, EventArgs e)
         {
-            MessageBox.Show("Управление: стрелки\nПробел — пауза\nEnter или пробел — рестарт после проигрыша\n\nУдачи!",
-                            "Змейка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(
+                "Управление: стрелки\nПробел — пауза\nEnter или пробел — рестарт после проигрыша\n\nУдачи!",
+                "Змейка", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void StartGame()
@@ -53,46 +45,35 @@ namespace snakeclassic
             direction = Direction.Right;
             snake.Clear();
 
-            // Начальная змейка (5 сегментов в центре)
-            int startX = 15 * CellSize;  // Центр по X
-            int startY = 12 * CellSize;  // Центр по Y
+            int startX = 15 * CellSize;
+            int startY = 12 * CellSize;
             for (int i = 4; i >= 0; i--)
                 snake.Add(new Point(startX + i * CellSize, startY));
 
-            //  Генерируем еду ПОСЛЕ змейки
-            do
-            {
-                GenerateFood();
-            } while (snake.Contains(food));
+            do { GenerateFood(); } while (snake.Contains(food));
 
-            gameTimer.Interval = 120;  // Чуть медленнее для теста
+            gameTimer.Interval = 120;
             gameTimer.Start();
         }
 
-
         private void GenerateFood()
         {
-            // ИСПРАВЛЕНО: правильные границы + защита от змейки
             int maxX = (this.ClientSize.Width / CellSize) - 1;
             int maxY = (this.ClientSize.Height / CellSize) - 1;
-
             do
             {
                 food = new Point(
                     rand.Next(0, maxX) * CellSize,
-                    rand.Next(0, maxY) * CellSize
-                );
-            } while (snake.Contains(food));  // Пока яблоко внутри змейки — генерируем заново
+                    rand.Next(0, maxY) * CellSize);
+            } while (snake.Contains(food));
         }
-
 
         private void GameTimer_Tick(object sender, EventArgs e)
         {
             if (gameOver) return;
-
             MoveSnake();
             CheckCollisions();
-            this.Invalidate(); // Перерисовать форму
+            this.Invalidate();
         }
 
         private void MoveSnake()
@@ -108,26 +89,23 @@ namespace snakeclassic
                 case Direction.Right: newHead.X += CellSize; break;
             }
 
-            snake.Insert(0, newHead); // Добавляем новую голову
+            snake.Insert(0, newHead);
 
-            // Если съели еду
             if (newHead == food)
             {
                 score += 10;
                 GenerateFood();
-                // Ускоряем игру каждые 50 очков
                 if (score % 50 == 0 && gameTimer.Interval > 30)
                     gameTimer.Interval -= 10;
             }
             else
             {
-                snake.RemoveAt(snake.Count - 1); // Убираем хвост
+                snake.RemoveAt(snake.Count - 1);
             }
         }
 
         private void CheckCollisions()
         {
-            if (snake.Contains(food)) GenerateFood();  // Если еда "застряла" в змейке
             Point head = snake[0];
 
             // Столкновение со стенами
@@ -154,15 +132,25 @@ namespace snakeclassic
             gameOver = true;
             gameTimer.Stop();
 
-            // Сохраняем результат в таблицу
-            string nick = Properties.Settings.Default.PlayerNick ?? "Игрок";
+            // Читаем ник из txt файла
+            string nick = "Игрок";
+            try
+            {
+                if (File.Exists(nicknamefrm.NickPath))
+                    nick = File.ReadAllText(nicknamefrm.NickPath).Trim();
+                if (string.IsNullOrEmpty(nick)) nick = "Игрок";
+            }
+            catch { }
+
+            // Сохраняем результат в leaderboard.txt
             leadbordfrm.AddScore(nick, score);
 
-            MessageBox.Show($"Игра окончена!\nВаш счёт: {score}", "Змейка",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(
+                $"Игра окончена!\nВаш счёт: {score}",
+                "Змейка", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-            private void Form1_KeyDown(object sender, KeyEventArgs e)
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (gameOver)
             {
@@ -173,17 +161,11 @@ namespace snakeclassic
 
             switch (e.KeyCode)
             {
-                case Keys.Up when direction != Direction.Down:
-                    direction = Direction.Up; break;
-                case Keys.Down when direction != Direction.Up:
-                    direction = Direction.Down; break;
-                case Keys.Left when direction != Direction.Right:
-                    direction = Direction.Left; break;
-                case Keys.Right when direction != Direction.Left:
-                    direction = Direction.Right; break;
-                case Keys.Space:
-                    gameTimer.Enabled = !gameTimer.Enabled; // Пауза
-                    break;
+                case Keys.Up when direction != Direction.Down: direction = Direction.Up; break;
+                case Keys.Down when direction != Direction.Up: direction = Direction.Down; break;
+                case Keys.Left when direction != Direction.Right: direction = Direction.Left; break;
+                case Keys.Right when direction != Direction.Left: direction = Direction.Right; break;
+                case Keys.Space: gameTimer.Enabled = !gameTimer.Enabled; break;
             }
         }
 
@@ -210,13 +192,12 @@ namespace snakeclassic
             {
                 string text = "ИГРА ОКОНЧЕНА\nНажмите ПРОБЕЛ или ENTER для рестарта";
                 SizeF size = g.MeasureString(text, new Font("Arial", 20, FontStyle.Bold));
-                g.DrawString(text, new Font("Arial", 20, FontStyle.Bold),
+                g.DrawString(text,
+                    new Font("Arial", 20, FontStyle.Bold),
                     Brushes.Yellow,
                     (this.ClientSize.Width - size.Width) / 2,
                     (this.ClientSize.Height - size.Height) / 2);
             }
         }
-
-
     }
 }

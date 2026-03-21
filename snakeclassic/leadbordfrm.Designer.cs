@@ -32,7 +32,7 @@
             this.headerRow.SuspendLayout();
             this.SuspendLayout();
 
-            // ── panel1 (шапка, drag) ──────────────────────────────────────
+            // ── panel1 (шапка) ────────────────────────────────────────────
             this.panel1.BackColor = System.Drawing.Color.FromArgb(40, 20, 70);
             this.panel1.Controls.Add(this.svernutbtn);
             this.panel1.Controls.Add(this.closebtn);
@@ -66,7 +66,7 @@
             this.closebtn.UseVisualStyleBackColor = true;
             this.closebtn.Click += new System.EventHandler(this.closebtn_Click);
 
-            // ── lblTitle (заголовок «ТАБЛИЦА ЛИДЕРОВ») ────────────────────
+            // ── lblTitle ──────────────────────────────────────────────────
             this.lblTitle.Text = "ТАБЛИЦА ЛИДЕРОВ";
             this.lblTitle.Font = new System.Drawing.Font("Impact", 22f, System.Drawing.FontStyle.Regular);
             this.lblTitle.ForeColor = System.Drawing.Color.FromArgb(255, 80, 220);
@@ -76,33 +76,10 @@
             this.lblTitle.Size = new System.Drawing.Size(460, 50);
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.TabIndex = 3;
+            this.lblTitle.Paint += new System.Windows.Forms.PaintEventHandler(this.lblTitle_Paint);
 
-            // Свечение через OutlineLabel — делаем через Paint
-            this.lblTitle.Paint += (s, e) =>
-            {
-                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                // Тень / свечение
-                using (var shadowBrush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(120, 180, 0, 255)))
-                {
-                    for (int dx = -2; dx <= 2; dx++)
-                        for (int dy = -2; dy <= 2; dy++)
-                            if (dx != 0 || dy != 0)
-                                e.Graphics.DrawString(this.lblTitle.Text,
-                                    this.lblTitle.Font, shadowBrush,
-                                    new System.Drawing.RectangleF(dx, dy, this.lblTitle.Width, this.lblTitle.Height),
-                                    new System.Drawing.StringFormat { Alignment = System.Drawing.StringAlignment.Center, LineAlignment = System.Drawing.StringAlignment.Center });
-                }
-                using (var mainBrush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 80, 220)))
-                {
-                    e.Graphics.DrawString(this.lblTitle.Text,
-                        this.lblTitle.Font, mainBrush,
-                        new System.Drawing.RectangleF(0, 0, this.lblTitle.Width, this.lblTitle.Height),
-                        new System.Drawing.StringFormat { Alignment = System.Drawing.StringAlignment.Center, LineAlignment = System.Drawing.StringAlignment.Center });
-                }
-            };
-
-            // ── headerRow (шапка таблицы) ─────────────────────────────────
-            this.headerRow.BackColor = System.Drawing.Color.FromArgb(80, 120, 60, 200);
+            // ── headerRow ─────────────────────────────────────────────────
+            this.headerRow.BackColor = System.Drawing.Color.FromArgb(80, 60, 200);
             this.headerRow.Controls.Add(this.lblHPlace);
             this.headerRow.Controls.Add(this.lblHNick);
             this.headerRow.Controls.Add(this.lblHScore);
@@ -125,7 +102,7 @@
             this.lblHNick.Font = new System.Drawing.Font("Segoe UI", 9f, System.Drawing.FontStyle.Bold);
             this.lblHNick.ForeColor = System.Drawing.Color.FromArgb(255, 215, 0);
             this.lblHNick.Location = new System.Drawing.Point(62, 0);
-            this.lblHNick.Size = new System.Drawing.Size(180, 30);
+            this.lblHNick.Size = new System.Drawing.Size(220, 30);
             this.lblHNick.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblHNick.Name = "lblHNick";
 
@@ -133,17 +110,17 @@
             this.lblHScore.Text = "ОЧКИ";
             this.lblHScore.Font = new System.Drawing.Font("Segoe UI", 9f, System.Drawing.FontStyle.Bold);
             this.lblHScore.ForeColor = System.Drawing.Color.FromArgb(255, 215, 0);
-            this.lblHScore.Location = new System.Drawing.Point(248, 0);
-            this.lblHScore.Size = new System.Drawing.Size(110, 30);
+            this.lblHScore.Location = new System.Drawing.Point(290, 0);
+            this.lblHScore.Size = new System.Drawing.Size(124, 30);
             this.lblHScore.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.lblHScore.Name = "lblHScore";
 
-            // ── tablePanel (FlowLayoutPanel со строками) ──────────────────
+            // ── tablePanel ────────────────────────────────────────────────
+            this.tablePanel.AutoScroll = true;
             this.tablePanel.BackColor = System.Drawing.Color.Transparent;
             this.tablePanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.tablePanel.WrapContents = false;
-            this.tablePanel.AutoScroll = false;
-            this.tablePanel.Location = new System.Drawing.Point(20, 144);
+            this.tablePanel.Location = new System.Drawing.Point(20, 142);
             this.tablePanel.Name = "tablePanel";
             this.tablePanel.Size = new System.Drawing.Size(420, 380);
             this.tablePanel.TabIndex = 5;
@@ -154,30 +131,27 @@
             this.nazad_btn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.nazad_btn.FlatAppearance.BorderSize = 0;
             this.nazad_btn.BackColor = System.Drawing.Color.Transparent;
-            this.nazad_btn.Location = new System.Drawing.Point(145, 540);
+            this.nazad_btn.Location = new System.Drawing.Point(155, 535);
             this.nazad_btn.Name = "nazad_btn";
-            this.nazad_btn.Size = new System.Drawing.Size(171, 49);
+            this.nazad_btn.Size = new System.Drawing.Size(150, 50);
             this.nazad_btn.TabIndex = 6;
             this.nazad_btn.UseVisualStyleBackColor = false;
             this.nazad_btn.Click += new System.EventHandler(this.nazad_btn_Click);
 
             // ── Form ──────────────────────────────────────────────────────
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(460, 610);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Name = "leadbordfrm";
-            this.Text = "Таблица лидеров";
-            this.Load += new System.EventHandler(this.leadbordfrm_Load);
-
+            this.ClientSize = new System.Drawing.Size(460, 600);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.headerRow);
             this.Controls.Add(this.tablePanel);
             this.Controls.Add(this.nazad_btn);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Name = "leadbordfrm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Таблица лидеров";
+            this.Load += new System.EventHandler(this.leadbordfrm_Load);
 
             this.panel1.ResumeLayout(false);
             this.headerRow.ResumeLayout(false);

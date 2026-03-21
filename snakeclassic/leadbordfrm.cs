@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace snakeclassic
 {
     public partial class leadbordfrm : Form
     {
+        private static readonly string SavePath =
+            @"D:\Visual Studio\course\snakeclassic\leaderboard.txt";
+
         public leadbordfrm()
         {
             InitializeComponent();
@@ -18,27 +23,22 @@ namespace snakeclassic
 
         [DllImport("user32.Dll", EntryPoint = "ReleaseCapture")]
         private extern static void ReleaseCapture();
-        [DllImport("user32.Dll", EntryPoint = "SendMessage")]
-        private extern static void SendMessage(System.IntPtr hWnd, int wMsg, int wParam, int lParam);
 
+        [DllImport("user32.Dll", EntryPoint = "SendMessage")]
+        private extern static void SendMessage(IntPtr hWnd, int wMsg, int wParam, int lParam);
+
+        // ── Drag ──────────────────────────────────────────────────────────
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
                 ReleaseCapture();
-                SendMessage(FindForm().Handle, 0x112, 0xf012, 0);
+                SendMessage(this.Handle, 0x112, 0xf012, 0);
             }
         }
 
-        private void closebtn_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
-        private void svernutbtn_Click(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Minimized;
-        }
+        private void closebtn_Click(object sender, EventArgs e) => Application.Exit();
+        private void svernutbtn_Click(object sender, EventArgs e) => this.WindowState = FormWindowState.Minimized;
 
         private void nazad_btn_Click(object sender, EventArgs e)
         {
@@ -47,6 +47,7 @@ namespace snakeclassic
             this.Hide();
         }
 
+        // ── Load ──────────────────────────────────────────────────────────
         private void leadbordfrm_Load(object sender, EventArgs e)
         {
             nazad_btn.MouseEnter += (s, ev) =>
@@ -57,111 +58,138 @@ namespace snakeclassic
             LoadLeaderboard();
         }
 
-        // ── Загрузка таблицы ──────────────────────────────────────────────
+        // ── Paint заголовка (свечение) — вынесен из Designer ─────────────
+        private void lblTitle_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            // Фиолетовое свечение (тень)
+            using (var shadowBrush = new SolidBrush(Color.FromArgb(120, 180, 0, 255)))
+            {
+                for (int dx = -2; dx <= 2; dx++)
+                    for (int dy = -2; dy <= 2; dy++)
+                        if (dx != 0 || dy != 0)
+                            e.Graphics.DrawString(
+                                lblTitle.Text, lblTitle.Font, shadowBrush,
+                                new RectangleF(dx, dy, lblTitle.Width, lblTitle.Height),
+                                new StringFormat
+                                {
+                                    Alignment = StringAlignment.Center,
+                                    LineAlignment = StringAlignment.Center
+                                });
+            }
+
+            // Основной текст
+            using (var mainBrush = new SolidBrush(Color.FromArgb(255, 80, 220)))
+            {
+                e.Graphics.DrawString(
+                    lblTitle.Text, lblTitle.Font, mainBrush,
+                    new RectangleF(0, 0, lblTitle.Width, lblTitle.Height),
+                    new StringFormat
+                    {
+                        Alignment = StringAlignment.Center,
+                        LineAlignment = StringAlignment.Center
+                    });
+            }
+        }
+
+        // ── Загрузка таблицы из txt ───────────────────────────────────────
         private void LoadLeaderboard()
         {
-            // Читаем сохранённые результаты из Settings
-            // Формат строки: "Ник:Очки;Ник:Очки;..."
-            string raw = "";
-            try { raw = Properties.Settings.Default.LeaderboardData ?? ""; }
-            catch { raw = ""; }
+            var entries = ReadFromFile();
 
-            var entries = ParseLeaderboard(raw);
-
-            // Очищаем старые строки
             tablePanel.Controls.Clear();
 
             if (entries.Count == 0)
             {
-                // Пусто — показываем заглушку
-                Label empty = new Label();
-                empty.Text = "Пока нет результатов.\nСыграй в игру!";
-                empty.ForeColor = Color.FromArgb(200, 180, 255);
-                empty.Font = new Font("Segoe UI", 11, FontStyle.Italic);
-                empty.TextAlign = ContentAlignment.MiddleCenter;
-                empty.Dock = DockStyle.Fill;
+                var empty = new Label
+                {
+                    Text = "Пока нет результатов.\nСыграй в игру!",
+                    ForeColor = Color.FromArgb(200, 180, 255),
+                    Font = new Font("Segoe UI", 11, FontStyle.Italic),
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Size = new Size(420, 60)
+                };
                 tablePanel.Controls.Add(empty);
                 return;
             }
 
-            // Рисуем строки
-            for (int i = 0; i < Math.Min(entries.Count, 10); i++)
+            for (int i = 0; i < entries.Count; i++)
             {
-                AddRow(i + 1, entries[i].Key, entries[i].Value);
+                int place = i + 1;
+                string nick = entries[i].Key;
+                int score = entries[i].Value;
+
+                var row = new Panel
+                {
+                    Size = new Size(418, 34),
+                    BackColor = Color.Transparent
+                };
+
+                // Фон строки
+                Color rowColor = place == 1
+                    ? Color.FromArgb(60, 255, 215, 0)
+                    : place == 2
+                        ? Color.FromArgb(50, 192, 192, 192)
+                        : place == 3
+                            ? Color.FromArgb(50, 205, 127, 50)
+                            : i % 2 == 0
+                                ? Color.FromArgb(30, 150, 100, 220)
+                                : Color.FromArgb(15, 100, 60, 180);
+
+                row.BackColor = rowColor;
+
+                // Медаль / номер
+                var lblPlace = new Label
+                {
+                    Text = place == 1 ? "🥇" : place == 2 ? "🥈" : place == 3 ? "🥉" : $"#{place}",
+                    ForeColor = place <= 3 ? Color.FromArgb(255, 215, 0) : Color.White,
+                    Font = new Font("Segoe UI", 10, place <= 3 ? FontStyle.Bold : FontStyle.Regular),
+                    Location = new Point(6, 0),
+                    Size = new Size(56, 34),
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+
+                // Ник
+                var lblNick = new Label
+                {
+                    Text = nick,
+                    ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 10, FontStyle.Regular),
+                    Location = new Point(62, 0),
+                    Size = new Size(220, 34),
+                    TextAlign = ContentAlignment.MiddleLeft
+                };
+
+                // Очки
+                var lblScore = new Label
+                {
+                    Text = score.ToString(),
+                    ForeColor = Color.FromArgb(100, 255, 130),
+                    Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                    Location = new Point(290, 0),
+                    Size = new Size(124, 34),
+                    TextAlign = ContentAlignment.MiddleRight
+                };
+
+                row.Controls.Add(lblPlace);
+                row.Controls.Add(lblNick);
+                row.Controls.Add(lblScore);
+                tablePanel.Controls.Add(row);
             }
         }
 
-        private void AddRow(int place, string nick, int score)
-        {
-            Panel row = new Panel();
-            row.Size = new Size(tablePanel.Width - 10, 36);
-            row.Margin = new Padding(0, 0, 0, 4);
-
-            // Фон строки — чередование
-            row.BackColor = (place % 2 == 0)
-                ? Color.FromArgb(50, 255, 255, 255)
-                : Color.FromArgb(30, 255, 255, 255);
-
-            // Скруглённые углы через Paint
-            row.Paint += (s, e) =>
-            {
-                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(
-                    row.ClientRectangle,
-                    place == 1 ? Color.FromArgb(80, 255, 215, 0) :
-                    place == 2 ? Color.FromArgb(60, 192, 192, 192) :
-                    place == 3 ? Color.FromArgb(60, 205, 127, 50) :
-                                 Color.FromArgb(40, 150, 100, 220),
-                    Color.Transparent,
-                    System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
-                {
-                    e.Graphics.FillRectangle(brush, row.ClientRectangle);
-                }
-            };
-
-            // Место
-            Label lblPlace = new Label();
-            lblPlace.Text = place == 1 ? "🥇" : place == 2 ? "🥈" : place == 3 ? "🥉" : $"#{place}";
-            lblPlace.ForeColor = place <= 3 ? Color.Gold : Color.FromArgb(200, 180, 255);
-            lblPlace.Font = new Font("Segoe UI", place <= 3 ? 13 : 11, FontStyle.Bold);
-            lblPlace.Size = new Size(50, 36);
-            lblPlace.Location = new Point(6, 0);
-            lblPlace.TextAlign = ContentAlignment.MiddleCenter;
-
-            // Ник
-            Label lblNick = new Label();
-            lblNick.Text = nick;
-            lblNick.ForeColor = Color.White;
-            lblNick.Font = new Font("Segoe UI", 11, FontStyle.Bold);
-            lblNick.Size = new Size(180, 36);
-            lblNick.Location = new Point(62, 0);
-            lblNick.TextAlign = ContentAlignment.MiddleLeft;
-
-            // Очки
-            Label lblScore = new Label();
-            lblScore.Text = score.ToString("N0").Replace(",", " ");
-            lblScore.ForeColor = Color.FromArgb(255, 220, 80);
-            lblScore.Font = new Font("Segoe UI", 11, FontStyle.Bold);
-            lblScore.Size = new Size(110, 36);
-            lblScore.Location = new Point(248, 0);
-            lblScore.TextAlign = ContentAlignment.MiddleRight;
-
-            row.Controls.Add(lblPlace);
-            row.Controls.Add(lblNick);
-            row.Controls.Add(lblScore);
-
-            tablePanel.Controls.Add(row);
-        }
-
-        // ── Парсинг / сохранение ──────────────────────────────────────────
-        private List<KeyValuePair<string, int>> ParseLeaderboard(string raw)
+        // ── Чтение из файла ───────────────────────────────────────────────
+        private static List<KeyValuePair<string, int>> ReadFromFile()
         {
             var list = new List<KeyValuePair<string, int>>();
-            if (string.IsNullOrWhiteSpace(raw)) return list;
 
-            foreach (var entry in raw.Split(';'))
+            if (!File.Exists(SavePath))
+                return list;
+
+            foreach (var line in File.ReadAllLines(SavePath))
             {
-                var parts = entry.Split(':');
+                var parts = line.Split('|');
                 if (parts.Length == 2 && int.TryParse(parts[1], out int s))
                     list.Add(new KeyValuePair<string, int>(parts[0], s));
             }
@@ -169,32 +197,20 @@ namespace snakeclassic
             return list.OrderByDescending(x => x.Value).ToList();
         }
 
-        /// <summary>
-        /// Вызывать из Form1 после окончания игры: LeaderboardHelper.AddScore(nick, score)
-        /// </summary>
+        // ── Добавление результата (вызывать из Form1 после Game Over) ─────
         public static void AddScore(string nick, int score)
         {
-            string raw = "";
-            try { raw = Properties.Settings.Default.LeaderboardData ?? ""; }
-            catch { }
-
-            var list = new List<KeyValuePair<string, int>>();
-            if (!string.IsNullOrWhiteSpace(raw))
-            {
-                foreach (var entry in raw.Split(';'))
-                {
-                    var parts = entry.Split(':');
-                    if (parts.Length == 2 && int.TryParse(parts[1], out int s))
-                        list.Add(new KeyValuePair<string, int>(parts[0], s));
-                }
-            }
+            var list = ReadFromFile();
 
             list.Add(new KeyValuePair<string, int>(nick, score));
             list = list.OrderByDescending(x => x.Value).Take(10).ToList();
 
-            string saved = string.Join(";", list.Select(x => $"{x.Key}:{x.Value}"));
-            Properties.Settings.Default.LeaderboardData = saved;
-            Properties.Settings.Default.Save();
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(SavePath));
+                File.WriteAllLines(SavePath, list.Select(x => $"{x.Key}|{x.Value}"));
+            }
+            catch { /* молча игнорируем ошибки записи */ }
         }
     }
 }

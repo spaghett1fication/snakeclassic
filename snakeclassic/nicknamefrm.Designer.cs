@@ -35,7 +35,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.svernutbtn = new System.Windows.Forms.Button();
             this.closebtn = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.nicknametextbox = new System.Windows.Forms.TextBox();
             this.btn_gotov = new System.Windows.Forms.Button();
             this.nazad_btn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picturename)).BeginInit();
@@ -113,16 +113,16 @@
             this.closebtn.TabIndex = 0;
             this.closebtn.UseVisualStyleBackColor = true;
             // 
-            // textBox1
+            // nicknametextbox
             // 
-            this.textBox1.BackColor = System.Drawing.SystemColors.Menu;
-            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox1.Font = new System.Drawing.Font("Times New Roman", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox1.Location = new System.Drawing.Point(94, 157);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(309, 32);
-            this.textBox1.TabIndex = 6;
+            this.nicknametextbox.BackColor = System.Drawing.SystemColors.Menu;
+            this.nicknametextbox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.nicknametextbox.Font = new System.Drawing.Font("Times New Roman", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.nicknametextbox.Location = new System.Drawing.Point(94, 157);
+            this.nicknametextbox.Multiline = true;
+            this.nicknametextbox.Name = "nicknametextbox";
+            this.nicknametextbox.Size = new System.Drawing.Size(309, 32);
+            this.nicknametextbox.TabIndex = 6;
             // 
             // btn_gotov
             // 
@@ -157,7 +157,7 @@
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(484, 398);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.nicknametextbox);
             this.Controls.Add(this.nazad_btn);
             this.Controls.Add(this.btn_gotov);
             this.Controls.Add(this.panel1);
@@ -183,7 +183,7 @@
         private System.Windows.Forms.Button closebtn;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox nicknametextbox;
         private System.Windows.Forms.Button btn_gotov;
         private System.Windows.Forms.Button nazad_btn;
     }
