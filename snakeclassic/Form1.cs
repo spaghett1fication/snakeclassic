@@ -27,7 +27,7 @@ namespace snakeclassic
 
         private Font emojiFont;
         private Font scoreFont;
-
+        private StarField starField;
         private enum Direction { Up, Down, Left, Right }
 
         private static readonly Color[] HeadColors =
@@ -110,6 +110,7 @@ namespace snakeclassic
             nextDir = Direction.Right;
             snake.Clear();
             particles.Clear();
+            starField = new StarField(GridW, GridH);
             diamondVisible = false;
 
             // Стартовая позиция строго на сетке
@@ -442,6 +443,8 @@ namespace snakeclassic
 
             // Фон
             g.Clear(Color.FromArgb(15, 5, 30));
+            starField.Update();
+            starField.Draw(g);
 
             // Сетка
             using (Pen gridPen = new Pen(Color.FromArgb(25, 255, 255, 255)))
