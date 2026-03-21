@@ -38,11 +38,12 @@ namespace snakeclassic
             skinPanels = new Panel[] { skinPanel0, skinPanel1, skinPanel2, skinPanel3 };
             foodPanels = new Panel[] { foodPanel0, foodPanel1 };
 
-            // Восстанавливаем текущий выбор при повторном открытии
+            // Восстанавливаем текущий выбор при каждом открытии
             selectedSkin = nastoy.SelectedSkin;
             selectedFood = nastoy.SelectedFood;
 
-            // Подписываем клики на панели И на все дочерние контролы внутри
+            // Подписываем клики на панели И все дочерние контролы внутри
+            // (иначе клик по картинке/лейблу не доходит до Panel)
             foreach (Panel p in skinPanels)
             {
                 p.Click += skinPanel_Click;
@@ -118,14 +119,15 @@ namespace snakeclassic
         }
 
         // ── Кнопка Готово ─────────────────────────────────────────────
+        // ВАЖНО: используем Hide() а не Close() — Close() уничтожает форму
+        // и сбрасывает static поля при следующем открытии через new nastoy()
         private void btn_gotov_Click(object sender, EventArgs e)
         {
-            // Сохраняем выбор в статические поля — Form1 их прочитает
+            // Сохраняем выбор в static поля — Form1 их прочитает
             nastoy.SelectedSkin = selectedSkin;
             nastoy.SelectedFood = selectedFood;
 
-            // Показываем меню обратно и закрываем настройки
-            // (menu скрывала себя через Hide() перед открытием nastoy)
+            // Возвращаем menu (она была скрыта когда открывали nastoy)
             foreach (Form f in Application.OpenForms)
             {
                 if (f is menu)
@@ -135,7 +137,7 @@ namespace snakeclassic
                 }
             }
 
-            this.Close();
+            this.Hide();
         }
 
         private void btn_gotov_MouseEnter(object sender, EventArgs e)
@@ -151,6 +153,7 @@ namespace snakeclassic
         // ── Кнопка Назад ──────────────────────────────────────────────
         private void nazad_btn_Click(object sender, EventArgs e)
         {
+            // Не сохраняем — просто возвращаемся в меню
             foreach (Form f in Application.OpenForms)
             {
                 if (f is menu)
@@ -159,7 +162,7 @@ namespace snakeclassic
                     break;
                 }
             }
-            this.Close();
+            this.Hide();
         }
 
         private void nazad_btn_MouseEnter(object sender, EventArgs e)
@@ -188,7 +191,7 @@ namespace snakeclassic
             if (e.Button == MouseButtons.Left)
             {
                 ReleaseCapture();
-                SendMessage(FindForm().Handle, 0x112, 0xf012, 0);
+                SendMessage(this.Handle, 0x112, 0xf012, 0);
             }
         }
     }
