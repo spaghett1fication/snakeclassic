@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
@@ -7,13 +8,9 @@ namespace snakeclassic
 {
     public partial class nastoy : Form
     {
-        // ── Публичные статические поля — читаются из Form1 ────────────
+        // ── Публичные статические поля ────────────────────────────────
         public static int SelectedSkin = 0;   // 0=Зелёная 1=Оранжевая 2=Красная 3=Синяя
         public static int SelectedFood = 0;   // 0=Банан   1=Яблоко
-
-        // ══════════════════════════════════════════════════════════════
-        //  НОВОЕ: Коллизия со стенами (true = стены убивают)
-        // ══════════════════════════════════════════════════════════════
         public static bool WallCollision = true;
 
         // Локальные для UI
@@ -27,10 +24,9 @@ namespace snakeclassic
         private Panel[] skinPanels;
         private Panel[] foodPanels;
 
-        // ── Новые контролы для коллизии (создаются программно) ──
+        // ── Контрол коллизии (создаётся программно) ───────────────────
         private Label collisionTitle;
-        private Panel collisionPanel;
-        private Label collisionLbl;
+        private CheckBox collisionCheck;   // ← вместо Panel-кнопки
 
         public nastoy()
         {
@@ -49,12 +45,10 @@ namespace snakeclassic
             skinPanels = new Panel[] { skinPanel0, skinPanel1, skinPanel2, skinPanel3 };
             foodPanels = new Panel[] { foodPanel0, foodPanel1 };
 
-            // Восстанавливаем текущий выбор из статических полей
             selectedSkin = nastoy.SelectedSkin;
             selectedFood = nastoy.SelectedFood;
             wallCollision = nastoy.WallCollision;
 
-            // Подписываем клики на панели И на все дочерние контролы
             foreach (Panel p in skinPanels)
             {
                 p.Click += skinPanel_Click;
@@ -80,97 +74,131 @@ namespace snakeclassic
             RefreshSkinHighlight();
             RefreshFoodHighlight();
 
-            // ══════════════════════════════════════════════════════════
-            //  Создаём секцию "Коллизия" программно (Designer не нужен)
-            // ══════════════════════════════════════════════════════════
             CreateCollisionSection();
-            RefreshCollisionHighlight();
         }
 
         // ══════════════════════════════════════════════════════════════
-        //  КОЛЛИЗИЯ: создание UI
+        //  Секция «Коллизия» с кастомным CheckBox
         // ══════════════════════════════════════════════════════════════
         private void CreateCollisionSection()
         {
-            // Находим нижнюю границу панелей еды
+            // Нижний край панелей еды
             int foodBottom = 0;
             foreach (Panel p in foodPanels)
+                if (p.Bottom > foodBottom) foodBottom = p.Bottom;
+
+            // ── Заголовок ──────────────────────────────────────────
+            collisionTitle = new Label
             {
-                if (p.Bottom > foodBottom)
-                    foodBottom = p.Bottom;
-            }
-
-            // ── Заголовок секции ──
-            collisionTitle = new Label();
-            collisionTitle.Text = "КОЛЛИЗИЯ СО СТЕНАМИ";
-            collisionTitle.Font = new Font("Arial", 11F, FontStyle.Bold);
-            collisionTitle.ForeColor = Color.White;
-            collisionTitle.BackColor = Color.Transparent;
-            collisionTitle.Size = new Size(640, 26);
-            collisionTitle.Location = new Point(0, foodBottom + 18);
-            collisionTitle.TextAlign = ContentAlignment.MiddleCenter;
+                Text = "КОЛЛИЗИЯ СО СТЕНАМИ",
+                Font = new Font("Arial", 11F, FontStyle.Bold),
+                ForeColor = Color.White,
+                BackColor = Color.Transparent,
+                Size = new Size(640, 26),
+                Location = new Point(0, foodBottom + 18),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
             this.Controls.Add(collisionTitle);
+            collisionTitle.BringToFront();
 
-            // ── Панель-тогл ──
-            collisionPanel = new Panel();
-            collisionPanel.Size = new Size(300, 48);
-            collisionPanel.Location = new Point(
-                (this.ClientSize.Width - 300) / 2,
-                collisionTitle.Bottom + 8);
-            collisionPanel.BackColor = colorNormal;
-            collisionPanel.Cursor = Cursors.Hand;
-            collisionPanel.Click += collisionPanel_Click;
+            // ── CustomCheckBox ─────────────────────────────────────
+            //  Используем стандартный CheckBox с OwnerDraw — рисуем
+            //  в стиле фиолетово-тёмного UI формы настроек.
+            collisionCheck = new CheckBox
+            {
+                Text = "",            // текст рисуем сами в Paint
+                Checked = wallCollision,
+                FlatStyle = FlatStyle.Flat,
+                Appearance = Appearance.Button,   // выглядит как кнопка-тогл
+                TextAlign = ContentAlignment.MiddleCenter,
+                Size = new Size(300, 48),
+                Location = new Point((this.ClientSize.Width - 300) / 2,
+                                      collisionTitle.Bottom + 8),
+                Cursor = Cursors.Hand,
+                BackColor = wallCollision
+                    ? Color.FromArgb(160, 30, 30)
+                    : Color.FromArgb(0, 130, 70),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI Emoji", 11F, FontStyle.Bold),
+                UseVisualStyleBackColor = false,
+            };
+            // Убираем рамку стандартного Button-appearance
+            collisionCheck.FlatAppearance.BorderSize = 0;
+            collisionCheck.FlatAppearance.CheckedBackColor = Color.FromArgb(160, 30, 30);
+            collisionCheck.FlatAppearance.MouseOverBackColor = Color.FromArgb(80, 30, 140);
 
-            collisionLbl = new Label();
-            collisionLbl.Font = new Font("Segoe UI Emoji", 11F, FontStyle.Bold);
-            collisionLbl.ForeColor = Color.White;
-            collisionLbl.BackColor = Color.Transparent;
-            collisionLbl.Dock = DockStyle.Fill;
-            collisionLbl.TextAlign = ContentAlignment.MiddleCenter;
-            collisionLbl.Cursor = Cursors.Hand;
-            collisionLbl.Click += collisionPanel_Click;
+            // Рисуем содержимое сами через Paint
+            collisionCheck.Paint += CollisionCheck_Paint;
+            collisionCheck.CheckedChanged += CollisionCheck_CheckedChanged;
 
-            collisionPanel.Controls.Add(collisionLbl);
-            this.Controls.Add(collisionPanel);
+            this.Controls.Add(collisionCheck);
+            collisionCheck.BringToFront();
 
-            // ── Сдвигаем кнопки "Готово" и "Назад" ниже если нужно ──
-            int neededTop = collisionPanel.Bottom + 22;
-
+            // ── Сдвигаем кнопки «Готово» / «Назад» ───────────────
+            int neededTop = collisionCheck.Bottom + 22;
             if (btn_gotov.Top < neededTop)
                 btn_gotov.Location = new Point(btn_gotov.Left, neededTop);
-
             if (nazad_btn.Top < neededTop)
                 nazad_btn.Location = new Point(nazad_btn.Left, neededTop);
 
-            // Увеличиваем форму если кнопки вылезают за границы
             int neededHeight = Math.Max(btn_gotov.Bottom, nazad_btn.Bottom) + 20;
             if (this.ClientSize.Height < neededHeight)
                 this.ClientSize = new Size(this.ClientSize.Width, neededHeight);
         }
 
-        private void collisionPanel_Click(object sender, EventArgs e)
+        // ── Рисуем кастомный CheckBox ─────────────────────────────────
+        private void CollisionCheck_Paint(object sender, PaintEventArgs e)
         {
-            wallCollision = !wallCollision;
-            RefreshCollisionHighlight();
-        }
+            var cb = (CheckBox)sender;
+            bool on = cb.Checked;           // on = стены убивают
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
 
-        private void RefreshCollisionHighlight()
-        {
-            if (collisionPanel == null) return;
+            // Фон уже задан через BackColor, просто рисуем содержимое
 
-            if (wallCollision)
+            // ── Круглый индикатор (radio-style) слева ─────────────
+            int cx = 22, cy = cb.Height / 2;
+            int r = 11;
+            using (Pen outerPen = new Pen(Color.White, 2f))
+                g.DrawEllipse(outerPen, cx - r, cy - r, r * 2, r * 2);
+
+            if (on)
             {
-                collisionPanel.BackColor = Color.FromArgb(160, 30, 30);  // красный
-                collisionLbl.Text = "🧱  СТЕНЫ УБИВАЮТ";
+                // Красная заливка — стены убивают
+                using (SolidBrush fill = new SolidBrush(Color.FromArgb(255, 80, 80)))
+                    g.FillEllipse(fill, cx - r + 3, cy - r + 3, (r - 3) * 2, (r - 3) * 2);
             }
             else
             {
-                collisionPanel.BackColor = Color.FromArgb(0, 130, 70);   // зелёный
-                collisionLbl.Text = "🌀  ПРОХОД СКВОЗЬ СТЕНЫ";
+                // Зелёная заливка — проход сквозь стены
+                using (SolidBrush fill = new SolidBrush(Color.FromArgb(60, 220, 120)))
+                    g.FillEllipse(fill, cx - r + 3, cy - r + 3, (r - 3) * 2, (r - 3) * 2);
+            }
+
+            // ── Текст справа от индикатора ─────────────────────────
+            string text = on ? "🧱  СТЕНЫ УБИВАЮТ" : "🌀  ПРОХОД СКВОЗЬ СТЕНЫ";
+            using (var tf = new Font("Segoe UI Emoji", 11F, FontStyle.Bold))
+            using (SolidBrush textBrush = new SolidBrush(Color.White))
+            {
+                var sf = new StringFormat { LineAlignment = StringAlignment.Center };
+                var rect = new RectangleF(cx + r + 6, 0,
+                                            cb.Width - (cx + r + 6) - 4,
+                                            cb.Height);
+                g.DrawString(text, tf, textBrush, rect, sf);
             }
         }
 
-        // ── Выбор скина ───────────────────────────────────────────────
+        private void CollisionCheck_CheckedChanged(object sender, EventArgs e)
+        {
+            wallCollision = collisionCheck.Checked;
+            collisionCheck.BackColor = wallCollision
+                ? Color.FromArgb(160, 30, 30)
+                : Color.FromArgb(0, 130, 70);
+            collisionCheck.FlatAppearance.CheckedBackColor = collisionCheck.BackColor;
+            collisionCheck.Invalidate();
+        }
+
+        // ── Скин ─────────────────────────────────────────────────────
         private void skinPanel_Click(object sender, EventArgs e)
         {
             Control src = sender as Control;
@@ -179,11 +207,7 @@ namespace snakeclassic
 
             for (int i = 0; i < skinPanels.Length; i++)
             {
-                if (skinPanels[i] == clicked)
-                {
-                    selectedSkin = i;
-                    break;
-                }
+                if (skinPanels[i] == clicked) { selectedSkin = i; break; }
             }
             RefreshSkinHighlight();
         }
@@ -194,7 +218,7 @@ namespace snakeclassic
                 skinPanels[i].BackColor = (i == selectedSkin) ? colorSelected : colorNormal;
         }
 
-        // ── Выбор еды ─────────────────────────────────────────────────
+        // ── Еда ──────────────────────────────────────────────────────
         private void foodPanel_Click(object sender, EventArgs e)
         {
             Control src = sender as Control;
@@ -203,11 +227,7 @@ namespace snakeclassic
 
             for (int i = 0; i < foodPanels.Length; i++)
             {
-                if (foodPanels[i] == clicked)
-                {
-                    selectedFood = i;
-                    break;
-                }
+                if (foodPanels[i] == clicked) { selectedFood = i; break; }
             }
             RefreshFoodHighlight();
         }
@@ -218,79 +238,43 @@ namespace snakeclassic
                 foodPanels[i].BackColor = (i == selectedFood) ? colorSelected : colorNormal;
         }
 
-        // ── Кнопка Готово ─────────────────────────────────────────────
+        // ── Готово ───────────────────────────────────────────────────
         private void btn_gotov_Click(object sender, EventArgs e)
         {
-            // Сохраняем выбор в статические поля
             nastoy.SelectedSkin = selectedSkin;
             nastoy.SelectedFood = selectedFood;
-            nastoy.WallCollision = wallCollision;   // ← НОВОЕ
+            nastoy.WallCollision = wallCollision;
 
-            // Показываем menu и закрываем настройки
             foreach (Form f in Application.OpenForms)
             {
-                if (f is menu)
-                {
-                    f.Show();
-                    break;
-                }
+                if (f is menu) { f.Show(); this.Hide(); return; }
             }
-
+            menu m = new menu();
+            m.Show();
             this.Hide();
         }
 
-        private void btn_gotov_MouseEnter(object sender, EventArgs e)
-        {
-            btn_gotov.Location = new Point(btn_gotov.Location.X, btn_gotov.Location.Y + 2);
-        }
-
-        private void btn_gotov_MouseLeave(object sender, EventArgs e)
-        {
-            btn_gotov.Location = new Point(btn_gotov.Location.X, btn_gotov.Location.Y - 2);
-        }
-
-        // ── Кнопка Назад ──────────────────────────────────────────────
+        // ── Назад ────────────────────────────────────────────────────
         private void nazad_btn_Click(object sender, EventArgs e)
         {
-            // НЕ сохраняем — просто возвращаемся
             foreach (Form f in Application.OpenForms)
             {
-                if (f is menu)
-                {
-                    f.Show();
-                    break;
-                }
+                if (f is menu) { f.Show(); this.Hide(); return; }
             }
+            menu m = new menu();
+            m.Show();
             this.Hide();
         }
 
-        private void nazad_btn_MouseEnter(object sender, EventArgs e)
-        {
-            nazad_btn.Location = new Point(nazad_btn.Location.X, nazad_btn.Location.Y + 2);
-        }
-
-        private void nazad_btn_MouseLeave(object sender, EventArgs e)
-        {
-            nazad_btn.Location = new Point(nazad_btn.Location.X, nazad_btn.Location.Y - 2);
-        }
-
-        // ── Шапка ─────────────────────────────────────────────────────
-        private void svernutbtn_Click(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Minimized;
-        }
-
-        private void closebtn_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
+        // ── Закрыть / Свернуть ───────────────────────────────────────
+        private void closebtn_Click(object sender, EventArgs e) => Application.Exit();
+        private void svernutbtn_Click(object sender, EventArgs e) => this.WindowState = FormWindowState.Minimized;
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
                 ReleaseCapture();
-                SendMessage(FindForm().Handle, 0x112, 0xf012, 0);
+                SendMessage(this.Handle, 0x112, 0xf012, 0);
             }
         }
     }
