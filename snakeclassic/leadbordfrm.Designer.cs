@@ -67,6 +67,7 @@
             this.closebtn.Click += new System.EventHandler(this.closebtn_Click);
 
             // ── lblTitle ──────────────────────────────────────────────────
+            // Paint подписывается в leadbordfrm_Load — не в Designer!
             this.lblTitle.Text = "ТАБЛИЦА ЛИДЕРОВ";
             this.lblTitle.Font = new System.Drawing.Font("Impact", 22f, System.Drawing.FontStyle.Regular);
             this.lblTitle.ForeColor = System.Drawing.Color.FromArgb(255, 80, 220);
@@ -76,7 +77,6 @@
             this.lblTitle.Size = new System.Drawing.Size(460, 50);
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.TabIndex = 3;
-            this.lblTitle.Paint += new System.Windows.Forms.PaintEventHandler(this.lblTitle_Paint);
 
             // ── headerRow ─────────────────────────────────────────────────
             this.headerRow.BackColor = System.Drawing.Color.FromArgb(80, 60, 200);
@@ -93,27 +93,30 @@
             this.lblHPlace.Font = new System.Drawing.Font("Segoe UI", 9f, System.Drawing.FontStyle.Bold);
             this.lblHPlace.ForeColor = System.Drawing.Color.FromArgb(255, 215, 0);
             this.lblHPlace.Location = new System.Drawing.Point(6, 0);
-            this.lblHPlace.Size = new System.Drawing.Size(56, 30);
+            this.lblHPlace.Size = new System.Drawing.Size(52, 30);
             this.lblHPlace.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblHPlace.Name = "lblHPlace";
+            this.lblHPlace.TabIndex = 0;
 
             // ── lblHNick ──────────────────────────────────────────────────
             this.lblHNick.Text = "ИГРОК";
             this.lblHNick.Font = new System.Drawing.Font("Segoe UI", 9f, System.Drawing.FontStyle.Bold);
             this.lblHNick.ForeColor = System.Drawing.Color.FromArgb(255, 215, 0);
-            this.lblHNick.Location = new System.Drawing.Point(62, 0);
+            this.lblHNick.Location = new System.Drawing.Point(60, 0);
             this.lblHNick.Size = new System.Drawing.Size(220, 30);
             this.lblHNick.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblHNick.Name = "lblHNick";
+            this.lblHNick.TabIndex = 1;
 
             // ── lblHScore ─────────────────────────────────────────────────
             this.lblHScore.Text = "ОЧКИ";
             this.lblHScore.Font = new System.Drawing.Font("Segoe UI", 9f, System.Drawing.FontStyle.Bold);
             this.lblHScore.ForeColor = System.Drawing.Color.FromArgb(255, 215, 0);
-            this.lblHScore.Location = new System.Drawing.Point(290, 0);
-            this.lblHScore.Size = new System.Drawing.Size(124, 30);
+            this.lblHScore.Location = new System.Drawing.Point(288, 0);
+            this.lblHScore.Size = new System.Drawing.Size(128, 30);
             this.lblHScore.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.lblHScore.Name = "lblHScore";
+            this.lblHScore.TabIndex = 2;
 
             // ── tablePanel ────────────────────────────────────────────────
             this.tablePanel.AutoScroll = true;
@@ -122,7 +125,7 @@
             this.tablePanel.WrapContents = false;
             this.tablePanel.Location = new System.Drawing.Point(20, 142);
             this.tablePanel.Name = "tablePanel";
-            this.tablePanel.Size = new System.Drawing.Size(420, 380);
+            this.tablePanel.Size = new System.Drawing.Size(420, 360);
             this.tablePanel.TabIndex = 5;
 
             // ── nazad_btn ─────────────────────────────────────────────────
@@ -131,7 +134,7 @@
             this.nazad_btn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.nazad_btn.FlatAppearance.BorderSize = 0;
             this.nazad_btn.BackColor = System.Drawing.Color.Transparent;
-            this.nazad_btn.Location = new System.Drawing.Point(155, 535);
+            this.nazad_btn.Location = new System.Drawing.Point(155, 520);
             this.nazad_btn.Name = "nazad_btn";
             this.nazad_btn.Size = new System.Drawing.Size(150, 50);
             this.nazad_btn.TabIndex = 6;
@@ -139,9 +142,11 @@
             this.nazad_btn.Click += new System.EventHandler(this.nazad_btn_Click);
 
             // ── Form ──────────────────────────────────────────────────────
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(460, 600);
+            this.ClientSize = new System.Drawing.Size(460, 590);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.headerRow);
@@ -150,7 +155,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "leadbordfrm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Таблица лидеров";
+            this.Text = "Лидерборд";
             this.Load += new System.EventHandler(this.leadbordfrm_Load);
 
             this.panel1.ResumeLayout(false);

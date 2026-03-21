@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+
 namespace snakeclassic
 {
     public partial class nastoy : Form
@@ -18,10 +19,6 @@ namespace snakeclassic
         private Panel[] skinPanels;
         private Panel[] foodPanels;
 
-        // Для перетаскивания формы
-        private bool _dragging = false;
-        private Point _dragStart;
-
         public nastoy()
         {
             InitializeComponent();
@@ -34,21 +31,10 @@ namespace snakeclassic
         [DllImport("user32.Dll", EntryPoint = "SendMessage")]
         private extern static void SendMessage(System.IntPtr hWnd, int wMsg, int wParam, int lParam);
 
-
         private void nastoy_Load(object sender, EventArgs e)
         {
             skinPanels = new Panel[] { skinPanel0, skinPanel1, skinPanel2, skinPanel3 };
             foodPanels = new Panel[] { foodPanel0, foodPanel1 };
-
-            /* Загружаем сохранённые настройки
-            if (Properties.Settings.Default.SelectedSkin >= 0 &&
-                Properties.Settings.Default.SelectedSkin < skinPanels.Length)
-                selectedSkin = Properties.Settings.Default.SelectedSkin;
-
-            if (Properties.Settings.Default.SelectedFood >= 0 &&
-                Properties.Settings.Default.SelectedFood < foodPanels.Length)
-                selectedFood = Properties.Settings.Default.SelectedFood;
-            */
 
             RefreshSkinHighlight();
             RefreshFoodHighlight();
@@ -57,7 +43,6 @@ namespace snakeclassic
         // ── Выбор скина ────────────────────────────────────────────────
         private void skinPanel_Click(object sender, EventArgs e)
         {
-            // Определяем, какую панель кликнули (сам Panel или его дочерний контрол)
             Control src = sender as Control;
             Panel clicked = (src is Panel) ? (Panel)src : src?.Parent as Panel;
             if (clicked == null) return;
@@ -106,7 +91,6 @@ namespace snakeclassic
         // ── Кнопка Готово ──────────────────────────────────────────────
         private void btn_gotov_Click(object sender, EventArgs e)
         {
-
             this.Close();
         }
 
@@ -125,7 +109,7 @@ namespace snakeclassic
         {
             menu form = new menu();
             form.Show();
-            this.Hide(); // скрывает menu
+            this.Hide();
         }
 
         private void nazad_btn_MouseEnter(object sender, EventArgs e)
@@ -156,22 +140,6 @@ namespace snakeclassic
                 ReleaseCapture();
                 SendMessage(FindForm().Handle, 0x112, 0xf012, 0);
             }
-        }
-
-        protected override void OnMouseMove(MouseEventArgs e)
-        {
-            if (_dragging)
-            {
-                Point diff = Point.Subtract(e.Location, new Size(_dragStart));
-                this.Location = Point.Add(this.Location, new Size(diff));
-            }
-            base.OnMouseMove(e);
-        }
-
-        protected override void OnMouseUp(MouseEventArgs e)
-        {
-            _dragging = false;
-            base.OnMouseUp(e);
         }
     }
 }
