@@ -153,11 +153,16 @@ namespace snakeclassic
         {
             gameOver = true;
             gameTimer.Stop();
+
+            // Сохраняем результат в таблицу
+            string nick = Properties.Settings.Default.PlayerNick ?? "Игрок";
+            leadbordfrm.AddScore(nick, score);
+
             MessageBox.Show($"Игра окончена!\nВаш счёт: {score}", "Змейка",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
+            private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (gameOver)
             {
