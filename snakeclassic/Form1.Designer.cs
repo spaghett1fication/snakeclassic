@@ -1,5 +1,21 @@
 ﻿namespace snakeclassic
 {
+    // ── Панель без мерцания ──────────────────────────────────────────
+    // Замена стандартного Panel — включает двойную буферизацию на уровне контрола
+    public class DoubleBufferedPanel : System.Windows.Forms.Panel
+    {
+        public DoubleBufferedPanel()
+        {
+            this.DoubleBuffered = true;
+            this.SetStyle(
+                System.Windows.Forms.ControlStyles.AllPaintingInWmPaint |
+                System.Windows.Forms.ControlStyles.UserPaint |
+                System.Windows.Forms.ControlStyles.OptimizedDoubleBuffer,
+                true);
+            this.UpdateStyles();
+        }
+    }
+
     partial class Form1
     {
         private System.ComponentModel.IContainer components = null;
@@ -12,22 +28,19 @@
             this.lblNick = new System.Windows.Forms.Label();
             this.lblScore = new System.Windows.Forms.Label();
             this.lblLevel = new System.Windows.Forms.Label();
-            this.gamePanel = new System.Windows.Forms.Panel();
+            this.gamePanel = new DoubleBufferedPanel();   // ← без мерцания
             this.btnRestart = new System.Windows.Forms.Button();
             this.btnMenu = new System.Windows.Forms.Button();
 
             this.hudPanel.SuspendLayout();
             this.SuspendLayout();
 
-            // ── gameTimer ─────────────────────────────────────────────
+            // ── gameTimer ────────────────────────────────────────────
             this.gameTimer.Interval = 120;
             this.gameTimer.Tick += new System.EventHandler(this.GameTimer_Tick);
 
-            // ── hudPanel ──────────────────────────────────────────────
+            // ── hudPanel ─────────────────────────────────────────────
             this.hudPanel.BackColor = System.Drawing.Color.FromArgb(50, 0, 80);
-            this.hudPanel.Controls.Add(this.lblScore);
-            this.hudPanel.Controls.Add(this.lblNick);
-            this.hudPanel.Controls.Add(this.lblLevel);
             this.hudPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.hudPanel.Height = 42;
             this.hudPanel.Paint += (s, e) =>
@@ -37,7 +50,13 @@
                     0, 41, this.hudPanel.Width, 41);
             };
 
-            // ── lblNick ───────────────────────────────────────────────
+            // Порядок добавления важен для Dock:
+            // Left → Fill → Right  (именно в этом порядке)
+            this.hudPanel.Controls.Add(this.lblScore);   // Fill — добавляем первым
+            this.hudPanel.Controls.Add(this.lblLevel);   // Right
+            this.hudPanel.Controls.Add(this.lblNick);    // Left
+
+            // ── lblNick (слева) ───────────────────────────────────────
             this.lblNick.AutoSize = false;
             this.lblNick.Dock = System.Windows.Forms.DockStyle.Left;
             this.lblNick.Width = 220;
@@ -48,7 +67,7 @@
             this.lblNick.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblNick.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
 
-            // ── lblScore ──────────────────────────────────────────────
+            // ── lblScore (по центру, Fill) ────────────────────────────
             this.lblScore.AutoSize = false;
             this.lblScore.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblScore.ForeColor = System.Drawing.Color.FromArgb(255, 230, 0);
@@ -56,8 +75,29 @@
                                           System.Drawing.FontStyle.Bold);
             this.lblScore.Text = "🍎 0";
             this.lblScore.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // Фиксируем выравнивание текста через StringFormat при Paint
+            this.lblScore.Paint += (s, e) =>
+            {
+                var lbl = (System.Windows.Forms.Label)s;
+                e.Graphics.Clear(lbl.BackColor == System.Drawing.Color.Empty
+                    ? System.Drawing.Color.Transparent
+                    : lbl.BackColor);
 
-            // ── lblLevel ──────────────────────────────────────────────
+                using (var sf = new System.Drawing.StringFormat())
+                {
+                    sf.Alignment = System.Drawing.StringAlignment.Center;
+                    sf.LineAlignment = System.Drawing.StringAlignment.Center;
+                    e.Graphics.TextRenderingHint =
+                        System.Drawing.Text.TextRenderingHint.AntiAlias;
+                    e.Graphics.DrawString(
+                        lbl.Text, lbl.Font,
+                        new System.Drawing.SolidBrush(lbl.ForeColor),
+                        new System.Drawing.RectangleF(0, 0, lbl.Width, lbl.Height),
+                        sf);
+                }
+            };
+
+            // ── lblLevel (справа) ─────────────────────────────────────
             this.lblLevel.AutoSize = false;
             this.lblLevel.Dock = System.Windows.Forms.DockStyle.Right;
             this.lblLevel.Width = 110;
@@ -68,14 +108,15 @@
             this.lblLevel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.lblLevel.Padding = new System.Windows.Forms.Padding(0, 0, 12, 0);
 
-            // ── gamePanel ─────────────────────────────────────────────
+            // ── gamePanel (игровое поле) ──────────────────────────────
             this.gamePanel.BackColor = System.Drawing.Color.FromArgb(10, 2, 20);
             this.gamePanel.Location = new System.Drawing.Point(0, 42);
             this.gamePanel.Size = new System.Drawing.Size(640, 440);
-            this.gamePanel.Anchor = System.Windows.Forms.AnchorStyles.Top
-                                     | System.Windows.Forms.AnchorStyles.Bottom
-                                     | System.Windows.Forms.AnchorStyles.Left
-                                     | System.Windows.Forms.AnchorStyles.Right;
+            this.gamePanel.Anchor =
+                System.Windows.Forms.AnchorStyles.Top |
+                System.Windows.Forms.AnchorStyles.Bottom |
+                System.Windows.Forms.AnchorStyles.Left |
+                System.Windows.Forms.AnchorStyles.Right;
             this.gamePanel.Paint += new System.Windows.Forms.PaintEventHandler(
                                             this.gamePanel_Paint);
 
@@ -90,7 +131,7 @@
                 System.Drawing.Color.FromArgb(140, 0, 255);
             this.btnRestart.FlatAppearance.BorderSize = 2;
             this.btnRestart.Font = new System.Drawing.Font("Segoe UI", 11,
-                                          System.Drawing.FontStyle.Bold);
+                                              System.Drawing.FontStyle.Bold);
             this.btnRestart.Visible = false;
             this.btnRestart.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
@@ -106,7 +147,7 @@
                 System.Drawing.Color.FromArgb(255, 60, 100);
             this.btnMenu.FlatAppearance.BorderSize = 2;
             this.btnMenu.Font = new System.Drawing.Font("Segoe UI", 11,
-                                       System.Drawing.FontStyle.Bold);
+                                           System.Drawing.FontStyle.Bold);
             this.btnMenu.Visible = false;
             this.btnMenu.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnMenu.Click += new System.EventHandler(this.btnMenu_Click);
@@ -119,11 +160,6 @@
 
             // ── Form1 ─────────────────────────────────────────────────
             this.ClientSize = new System.Drawing.Size(640, 540);
-            this.Controls.Add(this.gamePanel);
-            this.Controls.Add(this.hudPanel);
-            this.Controls.Add(this.btnRestart);
-            this.Controls.Add(this.btnMenu);
-            this.Controls.Add(bottomPanel);
             this.Text = "Snake Classic";
             this.BackColor = System.Drawing.Color.FromArgb(20, 5, 35);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -131,6 +167,13 @@
             this.KeyPreview = true;
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+
+            // Порядок Controls важен — bottomPanel последним чтобы Dock.Bottom работал
+            this.Controls.Add(this.gamePanel);
+            this.Controls.Add(this.hudPanel);
+            this.Controls.Add(this.btnRestart);
+            this.Controls.Add(this.btnMenu);
+            this.Controls.Add(bottomPanel);
 
             this.hudPanel.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -141,7 +184,7 @@
         private System.Windows.Forms.Label lblNick;
         private System.Windows.Forms.Label lblScore;
         private System.Windows.Forms.Label lblLevel;
-        private System.Windows.Forms.Panel gamePanel;
+        private DoubleBufferedPanel gamePanel;
         private System.Windows.Forms.Button btnRestart;
         private System.Windows.Forms.Button btnMenu;
     }

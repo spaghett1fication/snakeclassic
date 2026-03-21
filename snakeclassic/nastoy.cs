@@ -42,6 +42,29 @@ namespace snakeclassic
             selectedSkin = nastoy.SelectedSkin;
             selectedFood = nastoy.SelectedFood;
 
+            // Подписываем клики на панели И на все дочерние контролы внутри
+            foreach (Panel p in skinPanels)
+            {
+                p.Click += skinPanel_Click;
+                p.Cursor = Cursors.Hand;
+                foreach (Control child in p.Controls)
+                {
+                    child.Click += skinPanel_Click;
+                    child.Cursor = Cursors.Hand;
+                }
+            }
+
+            foreach (Panel p in foodPanels)
+            {
+                p.Click += foodPanel_Click;
+                p.Cursor = Cursors.Hand;
+                foreach (Control child in p.Controls)
+                {
+                    child.Click += foodPanel_Click;
+                    child.Cursor = Cursors.Hand;
+                }
+            }
+
             RefreshSkinHighlight();
             RefreshFoodHighlight();
         }
@@ -94,11 +117,24 @@ namespace snakeclassic
                 foodPanels[i].BackColor = (i == selectedFood) ? colorSelected : colorNormal;
         }
 
-        // ── Кнопка Готово — сохраняем выбор в static поля ────────────
+        // ── Кнопка Готово ─────────────────────────────────────────────
         private void btn_gotov_Click(object sender, EventArgs e)
         {
+            // Сохраняем выбор в статические поля — Form1 их прочитает
             nastoy.SelectedSkin = selectedSkin;
             nastoy.SelectedFood = selectedFood;
+
+            // Показываем меню обратно и закрываем настройки
+            // (menu скрывала себя через Hide() перед открытием nastoy)
+            foreach (Form f in Application.OpenForms)
+            {
+                if (f is menu)
+                {
+                    f.Show();
+                    break;
+                }
+            }
+
             this.Close();
         }
 
@@ -115,9 +151,15 @@ namespace snakeclassic
         // ── Кнопка Назад ──────────────────────────────────────────────
         private void nazad_btn_Click(object sender, EventArgs e)
         {
-            menu form = new menu();
-            form.Show();
-            this.Hide();
+            foreach (Form f in Application.OpenForms)
+            {
+                if (f is menu)
+                {
+                    f.Show();
+                    break;
+                }
+            }
+            this.Close();
         }
 
         private void nazad_btn_MouseEnter(object sender, EventArgs e)
@@ -138,7 +180,7 @@ namespace snakeclassic
 
         private void closebtn_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Application.Exit();
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
