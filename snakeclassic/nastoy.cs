@@ -1,39 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.Runtime.InteropServices;
 namespace snakeclassic
 {
     public partial class nastoy : Form
     {
+        // Индексы выбранного скина и еды
+        private int selectedSkin = 0;
+        private int selectedFood = 0;
+
+        // Цвета карточек
+        private readonly Color colorNormal = Color.FromArgb(60, 20, 100);
+        private readonly Color colorSelected = Color.FromArgb(120, 40, 200);
+
+        // Массивы панелей для удобного перебора
+        private Panel[] skinPanels;
+        private Panel[] foodPanels;
+
+        // Для перетаскивания формы
+        private bool _dragging = false;
+        private Point _dragStart;
+
         public nastoy()
         {
             InitializeComponent();
             this.Text = string.Empty;
-            this.ControlBox = false;     
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;   // нельзя растягивать
-            this.MaximizeBox = false;
-            this.MinimizeBox = true;
-            this.AutoScaleMode = AutoScaleMode.None;
-
-            // Форма становится ровно по размеру твоего фона
-            if (this.BackgroundImage != null)
-            {
-                this.ClientSize = this.BackgroundImage.Size;
-                this.BackgroundImageLayout = ImageLayout.None;   // не растягивать
-            }
-
-            // Дополнительно жёстко фиксируем размер (на всякий случай)
-            this.MinimumSize = this.Size;
-            this.MaximumSize = this.Size;
+            this.ControlBox = false;
         }
+
         [DllImport("user32.Dll", EntryPoint = "ReleaseCapture")]
         private extern static void ReleaseCapture();
         [DllImport("user32.Dll", EntryPoint = "SendMessage")]
@@ -42,28 +37,116 @@ namespace snakeclassic
 
         private void nastoy_Load(object sender, EventArgs e)
         {
-            btn_gotov.MouseEnter += btn_gotov_MouseEnter;
-            btn_gotov.MouseLeave += btn_gotov_MouseLeave;
-            nazad_btn.MouseEnter += nazad_btn_MouseEnter;
-            nazad_btn.MouseLeave += nazad_btn_MouseLeave;
+            skinPanels = new Panel[] { skinPanel0, skinPanel1, skinPanel2, skinPanel3 };
+            foodPanels = new Panel[] { foodPanel0, foodPanel1 };
+
+            /* Загружаем сохранённые настройки
+            if (Properties.Settings.Default.SelectedSkin >= 0 &&
+                Properties.Settings.Default.SelectedSkin < skinPanels.Length)
+                selectedSkin = Properties.Settings.Default.SelectedSkin;
+
+            if (Properties.Settings.Default.SelectedFood >= 0 &&
+                Properties.Settings.Default.SelectedFood < foodPanels.Length)
+                selectedFood = Properties.Settings.Default.SelectedFood;
+            */
+
+            RefreshSkinHighlight();
+            RefreshFoodHighlight();
         }
+
+        // ── Выбор скина ────────────────────────────────────────────────
+        private void skinPanel_Click(object sender, EventArgs e)
+        {
+            // Определяем, какую панель кликнули (сам Panel или его дочерний контрол)
+            Control src = sender as Control;
+            Panel clicked = (src is Panel) ? (Panel)src : src?.Parent as Panel;
+            if (clicked == null) return;
+
+            for (int i = 0; i < skinPanels.Length; i++)
+            {
+                if (skinPanels[i] == clicked)
+                {
+                    selectedSkin = i;
+                    break;
+                }
+            }
+            RefreshSkinHighlight();
+        }
+
+        private void RefreshSkinHighlight()
+        {
+            for (int i = 0; i < skinPanels.Length; i++)
+                skinPanels[i].BackColor = (i == selectedSkin) ? colorSelected : colorNormal;
+        }
+
+        // ── Выбор еды ──────────────────────────────────────────────────
+        private void foodPanel_Click(object sender, EventArgs e)
+        {
+            Control src = sender as Control;
+            Panel clicked = (src is Panel) ? (Panel)src : src?.Parent as Panel;
+            if (clicked == null) return;
+
+            for (int i = 0; i < foodPanels.Length; i++)
+            {
+                if (foodPanels[i] == clicked)
+                {
+                    selectedFood = i;
+                    break;
+                }
+            }
+            RefreshFoodHighlight();
+        }
+
+        private void RefreshFoodHighlight()
+        {
+            for (int i = 0; i < foodPanels.Length; i++)
+                foodPanels[i].BackColor = (i == selectedFood) ? colorSelected : colorNormal;
+        }
+
+        // ── Кнопка Готово ──────────────────────────────────────────────
+        private void btn_gotov_Click(object sender, EventArgs e)
+        {
+
+            this.Close();
+        }
+
         private void btn_gotov_MouseEnter(object sender, EventArgs e)
         {
-            btn_gotov.Location = new Point(btn_gotov.Location.X + 2, btn_gotov.Location.Y + 2);
+            btn_gotov.Location = new Point(btn_gotov.Location.X, btn_gotov.Location.Y + 2);
         }
 
         private void btn_gotov_MouseLeave(object sender, EventArgs e)
         {
-            btn_gotov.Location = new Point(btn_gotov.Location.X - 2, btn_gotov.Location.Y - 2);
+            btn_gotov.Location = new Point(btn_gotov.Location.X, btn_gotov.Location.Y - 2);
         }
-        private void nazad_btn_MouseLeave(object sender, EventArgs e)
+
+        // ── Кнопка Назад ───────────────────────────────────────────────
+        private void nazad_btn_Click(object sender, EventArgs e)
         {
-            nazad_btn.Location = new Point(nazad_btn.Location.X + 2, nazad_btn.Location.Y + 2);
+            menu form = new menu();
+            form.Show();
+            this.Hide(); // скрывает menu
         }
 
         private void nazad_btn_MouseEnter(object sender, EventArgs e)
         {
-            nazad_btn.Location = new Point(nazad_btn.Location.X - 2, nazad_btn.Location.Y - 2);
+            nazad_btn.Location = new Point(nazad_btn.Location.X, nazad_btn.Location.Y + 2);
+        }
+
+        private void nazad_btn_MouseLeave(object sender, EventArgs e)
+        {
+            nazad_btn.Location = new Point(nazad_btn.Location.X, nazad_btn.Location.Y - 2);
+        }
+
+        // ── Шапка: свернуть / закрыть / перетаскивание ─────────────────
+        private void svernutbtn_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        private void closebtn_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
@@ -75,21 +158,20 @@ namespace snakeclassic
             }
         }
 
-        private void closebtn_Click(object sender, EventArgs e)
+        protected override void OnMouseMove(MouseEventArgs e)
         {
-            Application.Exit();
+            if (_dragging)
+            {
+                Point diff = Point.Subtract(e.Location, new Size(_dragStart));
+                this.Location = Point.Add(this.Location, new Size(diff));
+            }
+            base.OnMouseMove(e);
         }
 
-        private void svernutbtn_Click(object sender, EventArgs e)
+        protected override void OnMouseUp(MouseEventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
-        }
-
-        private void nazad_btn_Click(object sender, EventArgs e)
-        {
-            menu form = new menu();
-            form.Show();
-            this.Hide(); // скрывает menu
+            _dragging = false;
+            base.OnMouseUp(e);
         }
     }
 }
