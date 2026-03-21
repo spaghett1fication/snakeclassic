@@ -11,7 +11,7 @@ namespace snakeclassic
 {
     public partial class leadbordfrm : Form
     {
-        // ── Путь к файлу — публичный static ─────────────────────────────
+        // ── Путь к файлу — публичный static ───────────────────────────────
         public static readonly string SavePath =
             Path.Combine(@"D:\Visual Studio\course\snakeclassic", "leaderboard.txt");
 
@@ -27,7 +27,7 @@ namespace snakeclassic
         [DllImport("user32.Dll", EntryPoint = "SendMessage")]
         private extern static void SendMessage(IntPtr hWnd, int wMsg, int wParam, int lParam);
 
-        // ── Drag ────────────────────────────────────────────────────────
+        // ── Drag ──────────────────────────────────────────────────────────
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -47,18 +47,19 @@ namespace snakeclassic
             this.Hide();
         }
 
-        // ── Load ────────────────────────────────────────────────────────
+        // ── Load ──────────────────────────────────────────────────────────
         private void leadbordfrm_Load(object sender, EventArgs e)
         {
-            nazad_btn.MouseEnter += (s, ev) => nazad_btn.Location = new Point(nazad_btn.Location.X + 2, nazad_btn.Location.Y + 2);
-            nazad_btn.MouseLeave += (s, ev) => nazad_btn.Location = new Point(nazad_btn.Location.X - 2, nazad_btn.Location.Y - 2);
+            nazad_btn.MouseEnter += (s, ev) =>
+                nazad_btn.Location = new Point(nazad_btn.Location.X + 2, nazad_btn.Location.Y + 2);
+            nazad_btn.MouseLeave += (s, ev) =>
+                nazad_btn.Location = new Point(nazad_btn.Location.X - 2, nazad_btn.Location.Y - 2);
 
             this.lblTitle.Paint += new PaintEventHandler(lblTitle_Paint);
-
             LoadLeaderboard();
         }
 
-        // ── Paint заголовка ─────────────────────────────────────────────
+        // ── Paint заголовка ───────────────────────────────────────────────
         private void lblTitle_Paint(object sender, PaintEventArgs e)
         {
             var lbl = sender as Label;
@@ -75,28 +76,32 @@ namespace snakeclassic
                                 new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
             }
 
-            // Основной текст — белый
-            using (var mainBrush = new SolidBrush(Color.White))
-            {
+            // Основной текст — розовый
+            using (var mainBrush = new SolidBrush(Color.FromArgb(255, 80, 220)))
                 e.Graphics.DrawString(lbl.Text, lbl.Font, mainBrush,
                     new RectangleF(0, 0, lbl.Width, lbl.Height),
                     new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-            }
         }
 
-        // ── Загрузка таблицы в listView ─────────────────────────────────
+        // ── Загрузка таблицы в tablePanel ────────────────────────────────
         private void LoadLeaderboard()
         {
-            leaderView.Items.Clear();
+            tablePanel.Controls.Clear();
+
             var list = ReadFromFile();
 
             if (list.Count == 0)
             {
-                var empty = new ListViewItem("—");
-                empty.SubItems.Add("Пока нет результатов...");
-                empty.SubItems.Add("—");
-                empty.ForeColor = Color.Gray;
-                leaderView.Items.Add(empty);
+                var emptyLbl = new Label
+                {
+                    Text = "Пока нет результатов...",
+                    ForeColor = Color.FromArgb(180, 180, 180),
+                    Font = new Font("Segoe UI", 12f, FontStyle.Italic),
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Size = new Size(420, 50),
+                    BackColor = Color.Transparent
+                };
+                tablePanel.Controls.Add(emptyLbl);
                 return;
             }
 
@@ -104,27 +109,67 @@ namespace snakeclassic
 
             for (int i = 0; i < list.Count; i++)
             {
-                string place = (i < 3) ? medals[i] : $"  {i + 1}.";
-                var item = new ListViewItem(place);
-                item.SubItems.Add(list[i].Key);
-                item.SubItems.Add(list[i].Value.ToString());
+                var entry = list[i];
 
-                // Топ-3 — особые цвета
-                if (i == 0) item.ForeColor = Color.Gold;
-                else if (i == 1) item.ForeColor = Color.Silver;
-                else if (i == 2) item.ForeColor = Color.FromArgb(205, 127, 50);
-                else item.ForeColor = Color.LightCyan;
+                var row = new Panel
+                {
+                    Size = new Size(416, 36),
+                    BackColor = i % 2 == 0
+                        ? Color.FromArgb(60, 40, 100)
+                        : Color.FromArgb(45, 25, 80),
+                    Margin = new Padding(0, 0, 0, 2)
+                };
 
-                // Чередующийся фон
-                item.BackColor = (i % 2 == 0)
-                    ? Color.FromArgb(40, 15, 80)
-                    : Color.FromArgb(55, 20, 100);
+                // Золото/серебро/бронза для топ-3
+                if (i < 3)
+                    row.BackColor = i == 0 ? Color.FromArgb(80, 60, 0)
+                                 : i == 1 ? Color.FromArgb(50, 50, 60)
+                                          : Color.FromArgb(60, 35, 15);
 
-                leaderView.Items.Add(item);
+                // Место
+                var lblPlace = new Label
+                {
+                    Text = i < 3 ? medals[i] : $"{i + 1}.",
+                    Font = new Font("Segoe UI", 11f, FontStyle.Bold),
+                    ForeColor = i == 0 ? Color.Gold
+                              : i == 1 ? Color.Silver
+                              : i == 2 ? Color.FromArgb(205, 127, 50)
+                              : Color.White,
+                    Location = new Point(6, 0),
+                    Size = new Size(52, 36),
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+
+                // Ник
+                var lblNick = new Label
+                {
+                    Text = entry.Key,
+                    Font = new Font("Segoe UI", 10f),
+                    ForeColor = Color.White,
+                    Location = new Point(60, 0),
+                    Size = new Size(220, 36),
+                    TextAlign = ContentAlignment.MiddleLeft
+                };
+
+                // Очки
+                var lblScore = new Label
+                {
+                    Text = entry.Value.ToString(),
+                    Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                    ForeColor = Color.FromArgb(100, 255, 150),
+                    Location = new Point(288, 0),
+                    Size = new Size(122, 36),
+                    TextAlign = ContentAlignment.MiddleRight
+                };
+
+                row.Controls.Add(lblPlace);
+                row.Controls.Add(lblNick);
+                row.Controls.Add(lblScore);
+                tablePanel.Controls.Add(row);
             }
         }
 
-        // ── Чтение файла — PUBLIC STATIC ────────────────────────────────
+        // ── Чтение из файла — PUBLIC STATIC ──────────────────────────────
         public static List<KeyValuePair<string, int>> ReadFromFile()
         {
             var list = new List<KeyValuePair<string, int>>();
@@ -140,34 +185,41 @@ namespace snakeclassic
             return list.OrderByDescending(x => x.Value).ToList();
         }
 
-        // ── Добавление результата — PUBLIC STATIC ───────────────────────
+        // ── Добавление результата — PUBLIC STATIC ────────────────────────
         // Сохраняет ТОЛЬКО максимальный результат для каждого ника
         public static void AddScore(string nick, int score)
         {
-            if (score <= 0) return;
+            if (score < 10) return; // минимум 10 очков для записи
 
             var list = ReadFromFile();
 
-            // Ищем запись с таким же ником
             int existingIndex = list.FindIndex(x =>
                 string.Equals(x.Key, nick, StringComparison.OrdinalIgnoreCase));
 
             if (existingIndex >= 0)
             {
                 // Обновляем только если новый результат ЛУЧШЕ
-                if (score <= list[existingIndex].Value) return;
-                list.RemoveAt(existingIndex);
+                if (score > list[existingIndex].Value)
+                {
+                    list[existingIndex] = new KeyValuePair<string, int>(nick, score);
+                }
+                else
+                {
+                    return; // Результат хуже — не сохраняем
+                }
+            }
+            else
+            {
+                // Новый игрок
+                list.Add(new KeyValuePair<string, int>(nick, score));
             }
 
-            list.Add(new KeyValuePair<string, int>(nick, score));
             list = list.OrderByDescending(x => x.Value).Take(10).ToList();
 
             try
             {
                 string dir = Path.GetDirectoryName(SavePath);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 File.WriteAllLines(SavePath, list.Select(x => $"{x.Key}|{x.Value}"));
             }
             catch { /* молча игнорируем */ }
