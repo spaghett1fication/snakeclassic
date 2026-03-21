@@ -265,6 +265,25 @@ namespace snakeclassic
             m.Show();
             this.Hide();
         }
+        private void btn_gotov_MouseEnter(object sender, EventArgs e)
+        {
+            btn_gotov.Location = new Point(btn_gotov.Location.X + 2, btn_gotov.Location.Y + 2);
+        }
+
+        private void btn_gotov_MouseLeave(object sender, EventArgs e)
+        {
+            btn_gotov.Location = new Point(btn_gotov.Location.X - 2, btn_gotov.Location.Y - 2);
+        }
+
+        private void nazad_btn_MouseEnter(object sender, EventArgs e)
+        {
+            nazad_btn.Location = new Point(nazad_btn.Location.X + 2, nazad_btn.Location.Y + 2);
+        }
+
+        private void nazad_btn_MouseLeave(object sender, EventArgs e)
+        {
+            nazad_btn.Location = new Point(nazad_btn.Location.X - 2, nazad_btn.Location.Y - 2);
+        }
 
         // ── Закрыть / Свернуть ───────────────────────────────────────
         private void closebtn_Click(object sender, EventArgs e) => Application.Exit();
