@@ -10,7 +10,6 @@ namespace snakeclassic
     public partial class Form1 : Form
     {
         private const int CellSize = 20;
-
         private List<Point> snake = new List<Point>();
         private Point food;
         private Direction direction = Direction.Right;
@@ -19,34 +18,55 @@ namespace snakeclassic
         private int score = 0;
         private bool gameOver = false;
         private bool paused = false;
-
         private Font emojiFont;
         private Font scoreFont;
 
         private enum Direction { Up, Down, Left, Right }
 
         // ── Порядок совпадает с nastoy:
-        //    skinPanel0 = Зелёная  (0)
-        //    skinPanel1 = Оранжевая(1)
-        //    skinPanel2 = Красная  (2)
-        //    skinPanel3 = Синяя    (3)
-        private static readonly Color[] HeadColors =
-        {
-            Color.FromArgb(0,   220,  60),   // 0 Зелёная
-            Color.FromArgb(255, 140,   0),   // 1 Оранжевая
-            Color.FromArgb(220,  30,  30),   // 2 Красная
-            Color.FromArgb(0,   140, 255),   // 3 Синяя
+        // skinPanel0 = Зелёная  (0)
+        // skinPanel1 = Оранжевая(1)
+        // skinPanel2 = Красная  (2)
+        // skinPanel3 = Синяя    (3)
+        private static readonly Color[] HeadColors = {
+            Color.FromArgb(0, 220, 60),   // 0 Зелёная
+            Color.FromArgb(255, 140, 0),  // 1 Оранжевая
+            Color.FromArgb(220, 30, 30),  // 2 Красная
+            Color.FromArgb(0, 140, 255),  // 3 Синяя
         };
-        private static readonly Color[] BodyColors =
-        {
-            Color.FromArgb(0,   180,  40),   // 0 Зелёная
-            Color.FromArgb(210, 110,   0),   // 1 Оранжевая
-            Color.FromArgb(180,  20,  20),   // 2 Красная
-            Color.FromArgb(0,   100, 220),   // 3 Синяя
+
+        private static readonly Color[] BodyColors = {
+            Color.FromArgb(0, 180, 40),   // 0 Зелёная
+            Color.FromArgb(210, 110, 0),  // 1 Оранжевая
+            Color.FromArgb(180, 20, 20),  // 2 Красная
+            Color.FromArgb(0, 100, 220),  // 3 Синяя
         };
 
         // ── foodPanel0 = Банан (0), foodPanel1 = Яблоко (1)
         private static readonly string[] FoodEmojis = { "🍌", "🍎" };
+
+        // ══════════════════════════════════════════════════════════════
+        //  НОВОЕ: Алмаз 💎 (+5 очков, появляется/исчезает)
+        // ══════════════════════════════════════════════════════════════
+        private Point diamond;
+        private bool diamondVisible = false;
+        private Timer diamondSpawnTimer;   // когда появится следующий алмаз
+        private Timer diamondDespawnTimer; // через сколько исчезнет
+        private Font diamondFont;
+
+        // ══════════════════════════════════════════════════════════════
+        //  НОВОЕ: Частицы при поедании
+        // ══════════════════════════════════════════════════════════════
+        private List<Particle> particles = new List<Particle>();
+
+        private class Particle
+        {
+            public float X, Y;
+            public float VX, VY;
+            public float Life;   // 1.0 → 0.0, потом удаляется
+            public Color Color;
+            public int Size;
+        }
 
         [DllImport("user32.Dll", EntryPoint = "ReleaseCapture")]
         private extern static void ReleaseCapture();
@@ -59,16 +79,28 @@ namespace snakeclassic
             this.SetStyle(
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.UserPaint |
-                ControlStyles.OptimizedDoubleBuffer, true);
+                ControlStyles.OptimizedDoubleBuffer,
+                true);
             this.UpdateStyles();
 
             emojiFont = new Font("Segoe UI Emoji", 15f);
             scoreFont = new Font("Segoe UI", 14f, FontStyle.Bold);
+            diamondFont = new Font("Segoe UI Emoji", 13f);
+
+            // ── Таймер появления алмаза (каждые 8-15 сек) ──
+            diamondSpawnTimer = new Timer();
+            diamondSpawnTimer.Interval = 10000;
+            diamondSpawnTimer.Tick += DiamondSpawnTimer_Tick;
+
+            // ── Таймер исчезновения алмаза (4-7 сек на сбор) ──
+            diamondDespawnTimer = new Timer();
+            diamondDespawnTimer.Interval = 5000;
+            diamondDespawnTimer.Tick += DiamondDespawnTimer_Tick;
         }
 
         private void Form1_Load(object sender, EventArgs e) => StartGame();
 
-        // ── Старт ────────────────────────────────────────────────────
+        // ── Старт ──────────────────────────────────────────────────────
         private void StartGame()
         {
             score = 0;
@@ -76,7 +108,10 @@ namespace snakeclassic
             paused = false;
             direction = Direction.Right;
             nextDir = Direction.Right;
+
             snake.Clear();
+            particles.Clear();
+            diamondVisible = false;
 
             int startX = 15 * CellSize;
             int startY = 12 * CellSize;
@@ -99,6 +134,12 @@ namespace snakeclassic
             lblLevel.Text = "Ур.1";
             gameTimer.Interval = 120;
             gameTimer.Start();
+
+            // ── Запуск цикла алмазов ──
+            diamondSpawnTimer.Interval = rand.Next(8000, 16000);
+            diamondSpawnTimer.Start();
+            diamondDespawnTimer.Stop();
+
             btnRestart.Visible = false;
             btnMenu.Visible = false;
             gamePanel.Invalidate();
@@ -113,15 +154,88 @@ namespace snakeclassic
             {
                 food = new Point(rand.Next(0, cols) * CellSize,
                                  rand.Next(0, rows) * CellSize);
-            } while (snake.Contains(food));
+            }
+            while (snake.Contains(food));
         }
 
-        // ── Таймер ───────────────────────────────────────────────────
+        // ══════════════════════════════════════════════════════════════
+        //  АЛМАЗ: появление / исчезновение
+        // ══════════════════════════════════════════════════════════════
+        private void GenerateDiamond()
+        {
+            int cols = gamePanel.Width / CellSize;
+            int rows = gamePanel.Height / CellSize;
+            do
+            {
+                diamond = new Point(rand.Next(0, cols) * CellSize,
+                                    rand.Next(0, rows) * CellSize);
+            }
+            while (snake.Contains(diamond) || diamond == food);
+        }
+
+        private void DiamondSpawnTimer_Tick(object sender, EventArgs e)
+        {
+            diamondSpawnTimer.Stop();
+            GenerateDiamond();
+            diamondVisible = true;
+            diamondDespawnTimer.Interval = rand.Next(4000, 7000);
+            diamondDespawnTimer.Start();
+            gamePanel.Invalidate();
+        }
+
+        private void DiamondDespawnTimer_Tick(object sender, EventArgs e)
+        {
+            diamondDespawnTimer.Stop();
+            diamondVisible = false;
+            // Следующий алмаз появится через 8-15 сек
+            diamondSpawnTimer.Interval = rand.Next(8000, 16000);
+            diamondSpawnTimer.Start();
+            gamePanel.Invalidate();
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        //  ЧАСТИЦЫ: создание и обновление
+        // ══════════════════════════════════════════════════════════════
+        private void SpawnParticles(Point pos, Color color, int count = 12)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                float angle = (float)(rand.NextDouble() * Math.PI * 2);
+                float speed = (float)(rand.NextDouble() * 4 + 2);
+                particles.Add(new Particle
+                {
+                    X = pos.X + CellSize / 2f,
+                    Y = pos.Y + CellSize / 2f,
+                    VX = (float)Math.Cos(angle) * speed,
+                    VY = (float)Math.Sin(angle) * speed,
+                    Life = 1f,
+                    Color = color,
+                    Size = rand.Next(3, 7)
+                });
+            }
+        }
+
+        private void UpdateParticles()
+        {
+            for (int i = particles.Count - 1; i >= 0; i--)
+            {
+                var p = particles[i];
+                p.X += p.VX;
+                p.Y += p.VY;
+                p.Life -= 0.06f;  // ~16 тиков ≈ 0.3 сек при интервале ~20мс
+                if (p.Life <= 0)
+                    particles.RemoveAt(i);
+            }
+        }
+
+        // ── Таймер ─────────────────────────────────────────────────────
         private void GameTimer_Tick(object sender, EventArgs e)
         {
             if (gameOver || paused) return;
+
             direction = nextDir;
             MoveSnake();
+            UpdateParticles();
             gamePanel.Invalidate();
         }
 
@@ -138,25 +252,91 @@ namespace snakeclassic
                 case Direction.Right: newHead.X += CellSize; break;
             }
 
-            if (newHead.X < 0 || newHead.X >= gamePanel.Width ||
-                newHead.Y < 0 || newHead.Y >= gamePanel.Height)
-            { GameOver(); return; }
+            // ══════════════════════════════════════════════════════════
+            //  КОЛЛИЗИЯ СО СТЕНАМИ (настройка из nastoy)
+            // ══════════════════════════════════════════════════════════
+            if (nastoy.WallCollision)
+            {
+                // Классика: врезался в стену — game over
+                if (newHead.X < 0 || newHead.X >= gamePanel.Width ||
+                    newHead.Y < 0 || newHead.Y >= gamePanel.Height)
+                {
+                    GameOver();
+                    return;
+                }
+            }
+            else
+            {
+                // Проход сквозь стены: выходишь с другой стороны
+                if (newHead.X < 0)
+                    newHead.X = gamePanel.Width - CellSize;
+                else if (newHead.X >= gamePanel.Width)
+                    newHead.X = 0;
 
-            for (int i = 0; i < snake.Count - 1; i++)
-                if (snake[i] == newHead) { GameOver(); return; }
+                if (newHead.Y < 0)
+                    newHead.Y = gamePanel.Height - CellSize;
+                else if (newHead.Y >= gamePanel.Height)
+                    newHead.Y = 0;
+            }
+
+            // Столкновение с собой
+            for (int i = 0; i < snake.Count; i++)
+            {
+                if (newHead == snake[i])
+                {
+                    GameOver();
+                    return;
+                }
+            }
 
             snake.Insert(0, newHead);
 
+            bool ate = false;
+
+            // ── Обычная еда ──
             if (newHead == food)
             {
-                score += 10;
-                int level = score / 50 + 1;
+                score++;
+                ate = true;
+
+                // Частицы цвета скина
+                int skin = nastoy.SelectedSkin;
+                if (skin < 0 || skin >= HeadColors.Length) skin = 0;
+                SpawnParticles(food, HeadColors[skin], 12);
+
+                int level = score / 5 + 1;
                 lblLevel.Text = $"Ур.{level}";
-                if (level > 1) gameTimer.Interval = Math.Max(40, 120 - (level - 1) * 10);
+                if (level > 1)
+                    gameTimer.Interval = Math.Max(40, 120 - (level - 1) * 10);
+
                 GenerateFood();
-                hudPanel.Invalidate();   // обновляем HUD
+                hudPanel.Invalidate();
             }
-            else
+
+            // ── Алмаз 💎: +5 очков ──
+            if (diamondVisible && newHead == diamond)
+            {
+                score += 5;
+                ate = true;
+                diamondVisible = false;
+                diamondDespawnTimer.Stop();
+
+                // Голубые частицы — больше и ярче!
+                SpawnParticles(diamond, Color.FromArgb(0, 200, 255), 20);
+
+                // Перезапуск цикла появления
+                diamondSpawnTimer.Interval = rand.Next(8000, 16000);
+                diamondSpawnTimer.Start();
+
+                int level = score / 5 + 1;
+                lblLevel.Text = $"Ур.{level}";
+                if (level > 1)
+                    gameTimer.Interval = Math.Max(40, 120 - (level - 1) * 10);
+
+                hudPanel.Invalidate();
+            }
+
+            if (!ate)
             {
                 snake.RemoveAt(snake.Count - 1);
             }
@@ -166,6 +346,9 @@ namespace snakeclassic
         {
             gameOver = true;
             gameTimer.Stop();
+            diamondSpawnTimer.Stop();
+            diamondDespawnTimer.Stop();
+            diamondVisible = false;
 
             if (score >= 10)
             {
@@ -187,46 +370,43 @@ namespace snakeclassic
             gamePanel.Invalidate();
         }
 
-        // ── Клавиши ──────────────────────────────────────────────────
+        // ── Клавиши ────────────────────────────────────────────────────
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (gameOver)
             {
-                if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) StartGame();
-                else if (e.KeyCode == Keys.Escape) GoToMenu();
+                if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter)
+                    StartGame();
+                else if (e.KeyCode == Keys.Escape)
+                    GoToMenu();
                 return;
             }
 
             switch (e.KeyCode)
             {
-                case Keys.Up:
-                case Keys.W:
-                    if (direction != Direction.Down) nextDir = Direction.Up; break;
-                case Keys.Down:
-                case Keys.S:
-                    if (direction != Direction.Up) nextDir = Direction.Down; break;
-                case Keys.Left:
-                case Keys.A:
-                    if (direction != Direction.Right) nextDir = Direction.Left; break;
-                case Keys.Right:
-                case Keys.D:
-                    if (direction != Direction.Left) nextDir = Direction.Right; break;
-                case Keys.Space:
-                    paused = !paused;
-                    gamePanel.Invalidate();
-                    break;
-                case Keys.Escape:
-                    GoToMenu();
-                    break;
+                case Keys.Up: case Keys.W: if (direction != Direction.Down) nextDir = Direction.Up; break;
+                case Keys.Down: case Keys.S: if (direction != Direction.Up) nextDir = Direction.Down; break;
+                case Keys.Left: case Keys.A: if (direction != Direction.Right) nextDir = Direction.Left; break;
+                case Keys.Right: case Keys.D: if (direction != Direction.Left) nextDir = Direction.Right; break;
+                case Keys.Space: paused = !paused; gamePanel.Invalidate(); break;
+                case Keys.Escape: GoToMenu(); break;
             }
         }
 
         private void GoToMenu()
         {
             gameTimer.Stop();
+            diamondSpawnTimer.Stop();
+            diamondDespawnTimer.Stop();
+
             foreach (Form f in Application.OpenForms)
             {
-                if (f is menu) { f.Show(); this.Hide(); return; }
+                if (f is menu)
+                {
+                    f.Show();
+                    this.Hide();
+                    return;
+                }
             }
             menu m = new menu();
             m.Show();
@@ -245,7 +425,7 @@ namespace snakeclassic
             }
         }
 
-        // ── HUD: счёт + иконка еды строго по центру ─────────────────
+        // ── HUD: счёт + иконка еды строго по центру ───────────────────
         private void hudPanel_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -254,7 +434,6 @@ namespace snakeclassic
             string emoji = FoodEmojis[nastoy.SelectedFood];
             string scoreText = score.ToString();
 
-            // Измеряем ширину иконки и текста
             SizeF emojiSize = g.MeasureString(emoji, emojiFont);
             SizeF scoreSize = g.MeasureString(scoreText, scoreFont);
 
@@ -262,26 +441,20 @@ namespace snakeclassic
             float totalWidth = emojiSize.Width + gap + scoreSize.Width;
             float startX = (hudPanel.Width - totalWidth) / 2f;
             float centerY = hudPanel.Height / 2f;
-
             float emojiY = centerY - emojiSize.Height / 2f - 1f;
             float scoreY = centerY - scoreSize.Height / 2f;
 
-            // Рисуем иконку еды
-            g.DrawString(emoji, emojiFont, Brushes.White,
-                         startX, emojiY);
+            g.DrawString(emoji, emojiFont, Brushes.White, startX, emojiY);
 
-            // Рисуем счёт
             using (SolidBrush scoreBrush = new SolidBrush(Color.FromArgb(255, 230, 0)))
                 g.DrawString(scoreText, scoreFont, scoreBrush,
                              startX + emojiSize.Width + gap, scoreY);
 
-            // Разделитель снизу
             using (Pen pen = new Pen(Color.FromArgb(180, 0, 255), 2))
-                g.DrawLine(pen, 0, hudPanel.Height - 1,
-                                hudPanel.Width, hudPanel.Height - 1);
+                g.DrawLine(pen, 0, hudPanel.Height - 1, hudPanel.Width, hudPanel.Height - 1);
         }
 
-        // ── Игровое поле ─────────────────────────────────────────────
+        // ── Игровое поле ───────────────────────────────────────────────
         private void gamePanel_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -299,9 +472,35 @@ namespace snakeclassic
                     g.DrawLine(gridPen, 0, y, gamePanel.Width, y);
             }
 
-            // Еда — эмодзи стикер
-            string foodEmoji = FoodEmojis[nastoy.SelectedFood];
-            g.DrawString(foodEmoji, emojiFont, Brushes.White, food.X - 2, food.Y - 2);
+            // Еда
+            int fi = nastoy.SelectedFood;
+            if (fi < 0 || fi >= FoodEmojis.Length) fi = 0;
+            g.DrawString(FoodEmojis[fi], emojiFont, Brushes.White, food.X - 2, food.Y - 2);
+
+            // ── Алмаз 💎 (пульсирует пока виден) ──
+            if (diamondVisible)
+            {
+                g.DrawString("💎", diamondFont, Brushes.White, diamond.X - 1, diamond.Y - 1);
+            }
+
+            // ── Частицы ──
+            foreach (var p in particles)
+            {
+                int alpha = (int)(p.Life * 255);
+                if (alpha < 0) alpha = 0;
+                if (alpha > 255) alpha = 255;
+                float drawSize = p.Size * p.Life; // уменьшаются к концу жизни
+                if (drawSize < 0.5f) continue;
+
+                using (SolidBrush b = new SolidBrush(
+                    Color.FromArgb(alpha, p.Color.R, p.Color.G, p.Color.B)))
+                {
+                    g.FillRectangle(b,
+                        p.X - drawSize / 2f,
+                        p.Y - drawSize / 2f,
+                        drawSize, drawSize);
+                }
+            }
 
             // Змейка
             int skin = nastoy.SelectedSkin;
@@ -311,28 +510,72 @@ namespace snakeclassic
             {
                 bool isHead = (i == 0);
                 Color c = isHead ? HeadColors[skin] : BodyColors[skin];
+
                 Rectangle rect = new Rectangle(
                     snake[i].X + 1, snake[i].Y + 1,
                     CellSize - 2, CellSize - 2);
 
                 using (SolidBrush b = new SolidBrush(c))
                     g.FillRectangle(b, rect);
-
                 using (Pen p = new Pen(Color.FromArgb(50, 0, 0, 0), 1))
                     g.DrawRectangle(p, rect);
 
-                // Глаза на голове
+                // ══════════════════════════════════════════════════════
+                //  ГЛАЗА: теперь поворачиваются по направлению!
+                // ══════════════════════════════════════════════════════
                 if (isHead)
                 {
+                    int hx = snake[i].X;
+                    int hy = snake[i].Y;
+
+                    // Позиции двух глаз (чёрный круг 5x5) и зрачков (белый 2x2)
+                    int e1x, e1y, e2x, e2y;
+                    int p1x, p1y, p2x, p2y;
+
+                    switch (direction)
+                    {
+                        case Direction.Right:
+                            // Глаза справа, друг над другом
+                            e1x = hx + 12; e1y = hy + 4;
+                            e2x = hx + 12; e2y = hy + 11;
+                            p1x = hx + 14; p1y = hy + 5;
+                            p2x = hx + 14; p2y = hy + 12;
+                            break;
+
+                        case Direction.Left:
+                            // Глаза слева
+                            e1x = hx + 3; e1y = hy + 4;
+                            e2x = hx + 3; e2y = hy + 11;
+                            p1x = hx + 3; p1y = hy + 5;
+                            p2x = hx + 3; p2y = hy + 12;
+                            break;
+
+                        case Direction.Up:
+                            // Глаза сверху, рядом
+                            e1x = hx + 4; e1y = hy + 3;
+                            e2x = hx + 11; e2y = hy + 3;
+                            p1x = hx + 5; p1y = hy + 3;
+                            p2x = hx + 12; p2y = hy + 3;
+                            break;
+
+                        default: // Down
+                            // Глаза снизу
+                            e1x = hx + 4; e1y = hy + 12;
+                            e2x = hx + 11; e2y = hy + 12;
+                            p1x = hx + 5; p1y = hy + 14;
+                            p2x = hx + 12; p2y = hy + 14;
+                            break;
+                    }
+
                     using (SolidBrush black = new SolidBrush(Color.Black))
                     {
-                        g.FillEllipse(black, snake[i].X + 4, snake[i].Y + 4, 5, 5);
-                        g.FillEllipse(black, snake[i].X + 11, snake[i].Y + 4, 5, 5);
+                        g.FillEllipse(black, e1x, e1y, 5, 5);
+                        g.FillEllipse(black, e2x, e2y, 5, 5);
                     }
                     using (SolidBrush white = new SolidBrush(Color.White))
                     {
-                        g.FillEllipse(white, snake[i].X + 5, snake[i].Y + 5, 2, 2);
-                        g.FillEllipse(white, snake[i].X + 12, snake[i].Y + 5, 2, 2);
+                        g.FillEllipse(white, p1x, p1y, 2, 2);
+                        g.FillEllipse(white, p2x, p2y, 2, 2);
                     }
                 }
             }
@@ -342,6 +585,7 @@ namespace snakeclassic
             {
                 using (SolidBrush dim = new SolidBrush(Color.FromArgb(140, 0, 0, 0)))
                     g.FillRectangle(dim, 0, 0, gamePanel.Width, gamePanel.Height);
+
                 using (Font f = new Font("Segoe UI", 28, FontStyle.Bold))
                 {
                     string txt = "ПАУЗА";
@@ -377,14 +621,10 @@ namespace snakeclassic
                     SizeF s3 = g.MeasureString(t3, fSmall);
                     SizeF s4 = g.MeasureString(t4, fSmall);
 
-                    g.DrawString(t1, fBig, Brushes.Yellow,
-                        cx - s1.Width / 2f, cy - 95);
-                    g.DrawString(t2, fMed, Brushes.LightGreen,
-                        cx - s2.Width / 2f, cy - 45);
-                    g.DrawString(t3, fSmall, Brushes.Plum,
-                        cx - s3.Width / 2f, cy + 5);
-                    g.DrawString(t4, fSmall, Brushes.LightGray,
-                        cx - s4.Width / 2f, cy + 35);
+                    g.DrawString(t1, fBig, Brushes.Yellow, cx - s1.Width / 2f, cy - 95);
+                    g.DrawString(t2, fMed, Brushes.LightGreen, cx - s2.Width / 2f, cy - 45);
+                    g.DrawString(t3, fSmall, Brushes.Plum, cx - s3.Width / 2f, cy + 5);
+                    g.DrawString(t4, fSmall, Brushes.LightGray, cx - s4.Width / 2f, cy + 35);
                 }
             }
         }
@@ -393,6 +633,9 @@ namespace snakeclassic
         {
             emojiFont?.Dispose();
             scoreFont?.Dispose();
+            diamondFont?.Dispose();
+            diamondSpawnTimer?.Dispose();
+            diamondDespawnTimer?.Dispose();
             if (disposing && components != null) components.Dispose();
             base.Dispose(disposing);
         }

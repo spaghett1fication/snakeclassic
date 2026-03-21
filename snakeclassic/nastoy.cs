@@ -8,18 +8,29 @@ namespace snakeclassic
     public partial class nastoy : Form
     {
         // ── Публичные статические поля — читаются из Form1 ────────────
-        public static int SelectedSkin = 0;   // 0=Зелёная 1=Синяя 2=Оранжевая 3=Красная
-        public static int SelectedFood = 0;   // 0=Яблоко  1=Банан
+        public static int SelectedSkin = 0;   // 0=Зелёная 1=Оранжевая 2=Красная 3=Синяя
+        public static int SelectedFood = 0;   // 0=Банан   1=Яблоко
+
+        // ══════════════════════════════════════════════════════════════
+        //  НОВОЕ: Коллизия со стенами (true = стены убивают)
+        // ══════════════════════════════════════════════════════════════
+        public static bool WallCollision = true;
 
         // Локальные для UI
         private int selectedSkin = 0;
         private int selectedFood = 0;
+        private bool wallCollision = true;
 
         private readonly Color colorNormal = Color.FromArgb(60, 20, 100);
         private readonly Color colorSelected = Color.FromArgb(120, 40, 200);
 
         private Panel[] skinPanels;
         private Panel[] foodPanels;
+
+        // ── Новые контролы для коллизии (создаются программно) ──
+        private Label collisionTitle;
+        private Panel collisionPanel;
+        private Label collisionLbl;
 
         public nastoy()
         {
@@ -41,6 +52,7 @@ namespace snakeclassic
             // Восстанавливаем текущий выбор из статических полей
             selectedSkin = nastoy.SelectedSkin;
             selectedFood = nastoy.SelectedFood;
+            wallCollision = nastoy.WallCollision;
 
             // Подписываем клики на панели И на все дочерние контролы
             foreach (Panel p in skinPanels)
@@ -67,6 +79,95 @@ namespace snakeclassic
 
             RefreshSkinHighlight();
             RefreshFoodHighlight();
+
+            // ══════════════════════════════════════════════════════════
+            //  Создаём секцию "Коллизия" программно (Designer не нужен)
+            // ══════════════════════════════════════════════════════════
+            CreateCollisionSection();
+            RefreshCollisionHighlight();
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        //  КОЛЛИЗИЯ: создание UI
+        // ══════════════════════════════════════════════════════════════
+        private void CreateCollisionSection()
+        {
+            // Находим нижнюю границу панелей еды
+            int foodBottom = 0;
+            foreach (Panel p in foodPanels)
+            {
+                if (p.Bottom > foodBottom)
+                    foodBottom = p.Bottom;
+            }
+
+            // ── Заголовок секции ──
+            collisionTitle = new Label();
+            collisionTitle.Text = "КОЛЛИЗИЯ СО СТЕНАМИ";
+            collisionTitle.Font = new Font("Arial", 11F, FontStyle.Bold);
+            collisionTitle.ForeColor = Color.White;
+            collisionTitle.BackColor = Color.Transparent;
+            collisionTitle.Size = new Size(640, 26);
+            collisionTitle.Location = new Point(0, foodBottom + 18);
+            collisionTitle.TextAlign = ContentAlignment.MiddleCenter;
+            this.Controls.Add(collisionTitle);
+
+            // ── Панель-тогл ──
+            collisionPanel = new Panel();
+            collisionPanel.Size = new Size(300, 48);
+            collisionPanel.Location = new Point(
+                (this.ClientSize.Width - 300) / 2,
+                collisionTitle.Bottom + 8);
+            collisionPanel.BackColor = colorNormal;
+            collisionPanel.Cursor = Cursors.Hand;
+            collisionPanel.Click += collisionPanel_Click;
+
+            collisionLbl = new Label();
+            collisionLbl.Font = new Font("Segoe UI Emoji", 11F, FontStyle.Bold);
+            collisionLbl.ForeColor = Color.White;
+            collisionLbl.BackColor = Color.Transparent;
+            collisionLbl.Dock = DockStyle.Fill;
+            collisionLbl.TextAlign = ContentAlignment.MiddleCenter;
+            collisionLbl.Cursor = Cursors.Hand;
+            collisionLbl.Click += collisionPanel_Click;
+
+            collisionPanel.Controls.Add(collisionLbl);
+            this.Controls.Add(collisionPanel);
+
+            // ── Сдвигаем кнопки "Готово" и "Назад" ниже если нужно ──
+            int neededTop = collisionPanel.Bottom + 22;
+
+            if (btn_gotov.Top < neededTop)
+                btn_gotov.Location = new Point(btn_gotov.Left, neededTop);
+
+            if (nazad_btn.Top < neededTop)
+                nazad_btn.Location = new Point(nazad_btn.Left, neededTop);
+
+            // Увеличиваем форму если кнопки вылезают за границы
+            int neededHeight = Math.Max(btn_gotov.Bottom, nazad_btn.Bottom) + 20;
+            if (this.ClientSize.Height < neededHeight)
+                this.ClientSize = new Size(this.ClientSize.Width, neededHeight);
+        }
+
+        private void collisionPanel_Click(object sender, EventArgs e)
+        {
+            wallCollision = !wallCollision;
+            RefreshCollisionHighlight();
+        }
+
+        private void RefreshCollisionHighlight()
+        {
+            if (collisionPanel == null) return;
+
+            if (wallCollision)
+            {
+                collisionPanel.BackColor = Color.FromArgb(160, 30, 30);  // красный
+                collisionLbl.Text = "🧱  СТЕНЫ УБИВАЮТ";
+            }
+            else
+            {
+                collisionPanel.BackColor = Color.FromArgb(0, 130, 70);   // зелёный
+                collisionLbl.Text = "🌀  ПРОХОД СКВОЗЬ СТЕНЫ";
+            }
         }
 
         // ── Выбор скина ───────────────────────────────────────────────
@@ -123,6 +224,7 @@ namespace snakeclassic
             // Сохраняем выбор в статические поля
             nastoy.SelectedSkin = selectedSkin;
             nastoy.SelectedFood = selectedFood;
+            nastoy.WallCollision = wallCollision;   // ← НОВОЕ
 
             // Показываем menu и закрываем настройки
             foreach (Form f in Application.OpenForms)
@@ -134,7 +236,7 @@ namespace snakeclassic
                 }
             }
 
-            this.Hide(); // Hide вместо Close — форма живёт, static поля не сбрасываются
+            this.Hide();
         }
 
         private void btn_gotov_MouseEnter(object sender, EventArgs e)
