@@ -204,7 +204,7 @@
             this.skinLbl1.Name = "skinLbl1";
             this.skinLbl1.Size = new System.Drawing.Size(130, 24);
             this.skinLbl1.TabIndex = 1;
-            this.skinLbl1.Text = "Синяя";
+            this.skinLbl1.Text = "Оранжевая";
             this.skinLbl1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.skinLbl1.Click += new System.EventHandler(this.skinPanel_Click);
             // 
@@ -243,7 +243,7 @@
             this.skinLbl2.Name = "skinLbl2";
             this.skinLbl2.Size = new System.Drawing.Size(130, 24);
             this.skinLbl2.TabIndex = 1;
-            this.skinLbl2.Text = "Оранжевая";
+            this.skinLbl2.Text = "Красная";
             this.skinLbl2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.skinLbl2.Click += new System.EventHandler(this.skinPanel_Click);
             // 
@@ -282,7 +282,7 @@
             this.skinLbl3.Name = "skinLbl3";
             this.skinLbl3.Size = new System.Drawing.Size(130, 24);
             this.skinLbl3.TabIndex = 1;
-            this.skinLbl3.Text = "Красная";
+            this.skinLbl3.Text = "Синяя";
             this.skinLbl3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.skinLbl3.Click += new System.EventHandler(this.skinPanel_Click);
             // 
@@ -321,7 +321,7 @@
             this.foodLbl0.Name = "foodLbl0";
             this.foodLbl0.Size = new System.Drawing.Size(130, 24);
             this.foodLbl0.TabIndex = 1;
-            this.foodLbl0.Text = "Яблоко";
+            this.foodLbl0.Text = "Банан";
             this.foodLbl0.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.foodLbl0.Click += new System.EventHandler(this.foodPanel_Click);
             // 
@@ -360,7 +360,7 @@
             this.foodLbl1.Name = "foodLbl1";
             this.foodLbl1.Size = new System.Drawing.Size(130, 24);
             this.foodLbl1.TabIndex = 1;
-            this.foodLbl1.Text = "Банан";
+            this.foodLbl1.Text = "Яблоко";
             this.foodLbl1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.foodLbl1.Click += new System.EventHandler(this.foodPanel_Click);
             // 

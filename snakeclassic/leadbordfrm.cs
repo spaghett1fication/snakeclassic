@@ -12,7 +12,7 @@ namespace snakeclassic
     public partial class leadbordfrm : Form
     {
         private static readonly string SavePath =
-            @"D:\Visual Studio\course\snakeclassic\leaderboard.txt";
+        Path.Combine(Application.StartupPath, "leaderboard.txt");
 
         public leadbordfrm()
         {
