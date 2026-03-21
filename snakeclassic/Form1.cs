@@ -8,10 +8,10 @@ namespace snakeclassic
 {
     public partial class Form1 : Form
     {
-        // ── Константы ────────────────────────────────────────────────────
+        // ── Константы ──────────────────────────────────────────────────
         private const int CellSize = 20;
 
-        // ── Состояние игры ───────────────────────────────────────────────
+        // ── Состояние игры ─────────────────────────────────────────────
         private List<Point> snake = new List<Point>();
         private Point food;
         private Direction direction = Direction.Right;
@@ -23,13 +23,39 @@ namespace snakeclassic
 
         private enum Direction { Up, Down, Left, Right }
 
-        // ── Конструктор ──────────────────────────────────────────────────
+        // ── Цвета змеек по скину (голова / тело) ──────────────────────
+        private static readonly Color[] HeadColors = new Color[]
+        {
+            Color.FromArgb(0,   255,  80),   // 0 — Зелёная
+            Color.FromArgb(0,   150, 255),   // 1 — Синяя
+            Color.FromArgb(255, 140,   0),   // 2 — Оранжевая
+            Color.FromArgb(255,  50,  50),   // 3 — Красная
+        };
+        private static readonly Color[] BodyColors = new Color[]
+        {
+            Color.FromArgb(0,   200,  50),   // 0 — Зелёная
+            Color.FromArgb(0,   100, 220),   // 1 — Синяя
+            Color.FromArgb(220, 100,   0),   // 2 — Оранжевая
+            Color.FromArgb(200,  30,  30),   // 3 — Красная
+        };
+
+        // ── Стикеры еды ───────────────────────────────────────────────
+        //    0 = Яблоко 🍎   1 = Банан 🍌
+        private static readonly string[] FoodEmojis = { "🍎", "🍌" };
+
+        // Шрифт для эмодзи-стикеров
+        private Font emojiFont;
+
+        // ── Конструктор ────────────────────────────────────────────────
         public Form1()
         {
             InitializeComponent();
             this.DoubleBuffered = true;
             this.KeyDown += Form1_KeyDown;
             gameTimer.Tick += GameTimer_Tick;
+
+            // Segoe UI Emoji — стандартный шрифт Windows для цветных эмодзи
+            emojiFont = new Font("Segoe UI Emoji", 13f);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -37,7 +63,7 @@ namespace snakeclassic
             StartGame();
         }
 
-        // ── Запуск / рестарт игры ────────────────────────────────────────
+        // ── Запуск / рестарт игры ──────────────────────────────────────
         private void StartGame()
         {
             score = 0;
@@ -45,8 +71,8 @@ namespace snakeclassic
             paused = false;
             direction = Direction.Right;
             nextDirection = Direction.Right;
-
             snake.Clear();
+
             int startX = 15 * CellSize;
             int startY = 12 * CellSize;
             for (int i = 4; i >= 0; i--)
@@ -62,38 +88,33 @@ namespace snakeclassic
                     string nick = File.ReadAllText(nicknamefrm.NickPath).Trim();
                     lblNick.Text = string.IsNullOrEmpty(nick) ? "Игрок" : nick;
                 }
-                else
-                    lblNick.Text = "Игрок";
+                else lblNick.Text = "Игрок";
             }
             catch { lblNick.Text = "Игрок"; }
 
             lblScore.Text = "Счёт: 0";
             lblLevel.Text = "Ур. 1";
-
             gameTimer.Interval = 120;
             gameTimer.Start();
-
             btnRestart.Visible = false;
             btnMenu.Visible = false;
-
             this.Invalidate();
             gamePanel.Invalidate();
         }
 
-        // ── Генерация еды ────────────────────────────────────────────────
+        // ── Генерация еды ──────────────────────────────────────────────
         private void GenerateFood()
         {
             int cols = gamePanel.Width / CellSize;
             int rows = gamePanel.Height / CellSize;
             do
             {
-                food = new Point(rand.Next(0, cols) * CellSize,
-                                 rand.Next(0, rows) * CellSize);
+                food = new Point(rand.Next(0, cols) * CellSize, rand.Next(0, rows) * CellSize);
             }
             while (snake.Contains(food));
         }
 
-        // ── Таймер ───────────────────────────────────────────────────────
+        // ── Таймер ─────────────────────────────────────────────────────
         private void GameTimer_Tick(object sender, EventArgs e)
         {
             if (gameOver || paused) return;
@@ -102,7 +123,7 @@ namespace snakeclassic
             gamePanel.Invalidate();
         }
 
-        // ── Движение змейки ──────────────────────────────────────────────
+        // ── Движение змейки ────────────────────────────────────────────
         private void MoveSnake()
         {
             Point head = snake[0];
@@ -119,34 +140,21 @@ namespace snakeclassic
             // Столкновение со стенами
             if (newHead.X < 0 || newHead.X >= gamePanel.Width ||
                 newHead.Y < 0 || newHead.Y >= gamePanel.Height)
-            {
-                GameOver();
-                return;
-            }
+            { GameOver(); return; }
 
             // Столкновение с телом (кроме последнего сегмента — он уйдёт)
             for (int i = 0; i < snake.Count - 1; i++)
-            {
-                if (snake[i] == newHead)
-                {
-                    GameOver();
-                    return;
-                }
-            }
+                if (snake[i] == newHead) { GameOver(); return; }
 
             snake.Insert(0, newHead);
 
-            // Съела еду?
             if (newHead == food)
             {
                 score += 10;
                 int level = score / 50 + 1;
                 lblScore.Text = $"Счёт: {score}";
                 lblLevel.Text = $"Ур. {level}";
-
-                if (level > 1)
-                    gameTimer.Interval = Math.Max(40, 120 - (level - 1) * 10);
-
+                if (level > 1) gameTimer.Interval = Math.Max(40, 120 - (level - 1) * 10);
                 GenerateFood();
             }
             else
@@ -155,7 +163,7 @@ namespace snakeclassic
             }
         }
 
-        // ── Конец игры ───────────────────────────────────────────────────
+        // ── Конец игры ─────────────────────────────────────────────────
         private void GameOver()
         {
             gameOver = true;
@@ -174,7 +182,6 @@ namespace snakeclassic
                     }
                 }
                 catch { }
-
                 leadbordfrm.AddScore(nick, score);
             }
 
@@ -183,15 +190,13 @@ namespace snakeclassic
             gamePanel.Invalidate();
         }
 
-        // ── Управление ───────────────────────────────────────────────────
+        // ── Управление ─────────────────────────────────────────────────
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (gameOver)
             {
-                if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter)
-                    StartGame();
-                else if (e.KeyCode == Keys.Escape)
-                    GoToMenu();
+                if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) StartGame();
+                else if (e.KeyCode == Keys.Escape) GoToMenu();
                 return;
             }
 
@@ -219,7 +224,7 @@ namespace snakeclassic
             }
         }
 
-        // ── Назад в меню ─────────────────────────────────────────────────
+        // ── Назад в меню ───────────────────────────────────────────────
         private void GoToMenu()
         {
             gameTimer.Stop();
@@ -228,14 +233,15 @@ namespace snakeclassic
             this.Hide();
         }
 
-        // ── Кнопки ───────────────────────────────────────────────────────
+        // ── Кнопки ─────────────────────────────────────────────────────
         private void btnRestart_Click(object sender, EventArgs e) => StartGame();
         private void btnMenu_Click(object sender, EventArgs e) => GoToMenu();
 
-        // ── Отрисовка игрового поля ──────────────────────────────────────
+        // ── Отрисовка игрового поля ────────────────────────────────────
         private void gamePanel_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             // Фон
             g.Clear(Color.FromArgb(15, 5, 30));
@@ -249,24 +255,41 @@ namespace snakeclassic
                     g.DrawLine(gridPen, 0, y, gamePanel.Width, y);
             }
 
-            // Еда
-            g.FillEllipse(Brushes.Red, food.X + 2, food.Y + 2, CellSize - 4, CellSize - 4);
-            g.DrawEllipse(Pens.OrangeRed, food.X + 2, food.Y + 2, CellSize - 4, CellSize - 4);
+            // ── Еда — стикер эмодзи ───────────────────────────────────
+            // nastoy.SelectedFood: 0=🍎  1=🍌
+            string emoji = FoodEmojis[nastoy.SelectedFood];
+            g.DrawString(emoji, emojiFont, Brushes.White, food.X - 1, food.Y - 2);
 
-            // Змейка
+            // ── Змейка — цвет зависит от nastoy.SelectedSkin ──────────
+            int skin = nastoy.SelectedSkin;
+            Color headColor = HeadColors[skin];
+            Color bodyColor = BodyColors[skin];
+
             for (int i = 0; i < snake.Count; i++)
             {
-                Color c = (i == 0)
-                    ? Color.FromArgb(0, 255, 80)
-                    : Color.FromArgb(0, 200, 50);
-
+                Color c = (i == 0) ? headColor : bodyColor;
                 using (SolidBrush b = new SolidBrush(c))
                     g.FillRectangle(b, snake[i].X + 1, snake[i].Y + 1, CellSize - 2, CellSize - 2);
 
                 g.DrawRectangle(Pens.Black, snake[i].X + 1, snake[i].Y + 1, CellSize - 2, CellSize - 2);
+
+                // Глаза на голове
+                if (i == 0)
+                {
+                    using (SolidBrush eye = new SolidBrush(Color.Black))
+                    {
+                        g.FillEllipse(eye, snake[i].X + 4, snake[i].Y + 4, 4, 4);
+                        g.FillEllipse(eye, snake[i].X + 12, snake[i].Y + 4, 4, 4);
+                    }
+                    using (SolidBrush shine = new SolidBrush(Color.White))
+                    {
+                        g.FillEllipse(shine, snake[i].X + 5, snake[i].Y + 5, 2, 2);
+                        g.FillEllipse(shine, snake[i].X + 13, snake[i].Y + 5, 2, 2);
+                    }
+                }
             }
 
-            // Пауза
+            // ── Пауза ─────────────────────────────────────────────────
             if (paused && !gameOver)
             {
                 using (SolidBrush dim = new SolidBrush(Color.FromArgb(140, 0, 0, 0)))
@@ -282,7 +305,7 @@ namespace snakeclassic
                 }
             }
 
-            // Game Over
+            // ── Game Over ─────────────────────────────────────────────
             if (gameOver)
             {
                 using (SolidBrush dim = new SolidBrush(Color.FromArgb(170, 0, 0, 0)))
@@ -300,7 +323,7 @@ namespace snakeclassic
                     string txt3 = (score < 10)
                         ? "Нужно набрать хотя бы 10 очков для рекорда"
                         : "Результат сохранён в таблице лидеров!";
-                    string txt4 = "ПРОБЕЛ / ENTER — рестарт    ESC — меню";
+                    string txt4 = "ПРОБЕЛ / ENTER — рестарт   ESC — меню";
 
                     SizeF s1 = g.MeasureString(txt1, fBig);
                     SizeF s2 = g.MeasureString(txt2, fMed);
@@ -313,6 +336,12 @@ namespace snakeclassic
                     g.DrawString(txt4, fSmall, Brushes.LightGray, cx - s4.Width / 2f, cy + 40);
                 }
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            emojiFont?.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

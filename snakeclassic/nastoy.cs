@@ -7,6 +7,10 @@ namespace snakeclassic
 {
     public partial class nastoy : Form
     {
+        // ── Публичные статические поля — читаются из Form1 ────────────
+        public static int SelectedSkin = 0;   // 0=Зелёная, 1=Синяя, 2=Оранжевая, 3=Красная
+        public static int SelectedFood = 0;   // 0=Яблоко 🍎, 1=Банан 🍌
+
         // Индексы выбранного скина и еды
         private int selectedSkin = 0;
         private int selectedFood = 0;
@@ -35,6 +39,10 @@ namespace snakeclassic
         {
             skinPanels = new Panel[] { skinPanel0, skinPanel1, skinPanel2, skinPanel3 };
             foodPanels = new Panel[] { foodPanel0, foodPanel1 };
+
+            // Восстановить текущий выбор при повторном открытии настроек
+            selectedSkin = SelectedSkin;
+            selectedFood = SelectedFood;
 
             RefreshSkinHighlight();
             RefreshFoodHighlight();
@@ -88,9 +96,11 @@ namespace snakeclassic
                 foodPanels[i].BackColor = (i == selectedFood) ? colorSelected : colorNormal;
         }
 
-        // ── Кнопка Готово ──────────────────────────────────────────────
+        // ── Кнопка Готово — сохраняет выбор в статические поля ────────
         private void btn_gotov_Click(object sender, EventArgs e)
         {
+            SelectedSkin = selectedSkin;
+            SelectedFood = selectedFood;
             this.Close();
         }
 
